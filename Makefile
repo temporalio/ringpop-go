@@ -9,6 +9,9 @@ export PATH := $(shell pwd)/scripts/travis/thrift-release/linux-x86_64:$(PATH)
 export PATH := $(shell pwd)/scripts/travis/thrift-gen-release/linux-x86_64:$(PATH)
 export PATH := $(GOPATH)/bin:$(PATH)
 
+export ROOT_DIR:=$(shell dirname $(realpath $(firstword $(MAKEFILE_LIST))))
+export GOPKG=$(shell go list)
+
 
 # Automatically gather packages
 PKGS = $(shell find . -maxdepth 3 -type d \

@@ -5,7 +5,6 @@
 set -eo pipefail
 
 
-
 mock_directory="${0%/*}/mocks"
 thrift_directory="${0%/*}/thrift"
 
@@ -19,6 +18,11 @@ mockery -case=underscore -dir "$thrift_directory" -recursive -inpkg -name TChanP
 mockery -case=underscore -dir "$VENDORPATH"/github.com/uber-common/bark -recursive -output "$mock_directory" -name Logger
 mockery -case=underscore -dir "$VENDORPATH"/github.com/uber-common/bark -recursive -output "$mock_directory" -name StatsReporter
 mockery -case=underscore -dir "$VENDORPATH"/github.com/uber/tchannel-go/thrift -recursive -output "$mock_directory" -name TChanClient
+
+# Remove vendor prefix from import as this is not supported
+VENDORREPLACE=$GOPKG/vendor/
+IMPORT_SED=$(echo "s/${VENDORREPLACE//\//\\/}//g")
+git grep -lz "$VENDORREPLACE" "$mock_directory" | xargs -0 sed -i "" -e "$IMPORT_SED"
 
 # Generate mock file for ringpop.Interface, but rename the mocked object to
 # mocks.Ringpop
