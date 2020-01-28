@@ -2,8 +2,8 @@ package mocks
 
 import (
 	"github.com/stretchr/testify/mock"
-	"github.com/temporalio/ringpop-go/swim"
 	"github.com/temporalio/ringpop-go/events"
+	"github.com/temporalio/ringpop-go/swim"
 )
 
 type SwimNode struct {

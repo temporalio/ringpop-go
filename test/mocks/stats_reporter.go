@@ -4,7 +4,7 @@ import (
 	"time"
 
 	"github.com/stretchr/testify/mock"
-	"github.com/temporalio/ringpop-go/vendor/github.com/uber-common/bark"
+	"github.com/uber-common/bark"
 )
 
 type StatsReporter struct {

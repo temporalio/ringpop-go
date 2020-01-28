@@ -2,7 +2,7 @@ package mocks
 
 import (
 	"github.com/stretchr/testify/mock"
-	"github.com/temporalio/ringpop-go/vendor/github.com/uber/tchannel-go/thrift"
+	"github.com/uber/tchannel-go/thrift"
 
 	athrift "github.com/apache/thrift/lib/go/thrift"
 )
