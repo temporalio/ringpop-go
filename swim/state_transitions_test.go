@@ -26,7 +26,7 @@ import (
 
 	"github.com/benbjohnson/clock"
 	"github.com/stretchr/testify/suite"
-	"github.com/uber/ringpop-go/util"
+	"github.com/temporalio/ringpop-go/util"
 )
 
 type StateTransitionsSuite struct {

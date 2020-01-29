@@ -26,12 +26,12 @@ import (
 
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/suite"
-	"github.com/uber/ringpop-go/hashring"
-	"github.com/uber/ringpop-go/logging"
-	"github.com/uber/ringpop-go/membership"
-	"github.com/uber/ringpop-go/swim"
-	"github.com/uber/ringpop-go/test/mocks"
-	"github.com/uber/ringpop-go/test/mocks/logger"
+	"github.com/temporalio/ringpop-go/hashring"
+	"github.com/temporalio/ringpop-go/logging"
+	"github.com/temporalio/ringpop-go/membership"
+	"github.com/temporalio/ringpop-go/swim"
+	"github.com/temporalio/ringpop-go/test/mocks"
+	"github.com/temporalio/ringpop-go/test/mocks/logger"
 	"github.com/uber/tchannel-go"
 )
 

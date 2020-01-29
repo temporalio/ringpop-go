@@ -14,7 +14,7 @@ Getting started
 To install ringpop-go:
 
 ```
-go get github.com/uber/ringpop-go
+go get github.com/temporalio/ringpop-go
 ```
 
 Developing

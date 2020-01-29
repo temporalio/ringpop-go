@@ -1,14 +1,14 @@
 package mocks
 
-import "github.com/stretchr/testify/mock"
+import (
+	"time"
 
-import "time"
-import "github.com/uber/ringpop-go/events"
-import "github.com/uber/ringpop-go/forward"
-
-import "github.com/uber/ringpop-go/swim"
-
-import "github.com/uber/tchannel-go"
+	"github.com/stretchr/testify/mock"
+	"github.com/temporalio/ringpop-go/events"
+	"github.com/temporalio/ringpop-go/forward"
+	"github.com/temporalio/ringpop-go/swim"
+	"github.com/uber/tchannel-go"
+)
 
 type Ringpop struct {
 	mock.Mock

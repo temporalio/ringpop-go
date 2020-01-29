@@ -26,8 +26,8 @@ import (
 
 	"github.com/benbjohnson/clock"
 	"github.com/uber-common/bark"
-	"github.com/uber/ringpop-go/logging"
-	"github.com/uber/ringpop-go/util"
+	"github.com/temporalio/ringpop-go/logging"
+	"github.com/temporalio/ringpop-go/util"
 )
 
 // subject is an interface to define the subject (eg. member) to transition state for. This interface allows to pass in both a Member and a Change struct to the schedule function.

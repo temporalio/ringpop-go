@@ -27,10 +27,10 @@ import (
 	"sync"
 
 	log "github.com/uber-common/bark"
-	"github.com/uber/ringpop-go/forward"
-	"github.com/uber/ringpop-go/logging"
-	"github.com/uber/ringpop-go/shared"
-	"github.com/uber/ringpop-go/util"
+	"github.com/temporalio/ringpop-go/forward"
+	"github.com/temporalio/ringpop-go/logging"
+	"github.com/temporalio/ringpop-go/shared"
+	"github.com/temporalio/ringpop-go/util"
 	"github.com/uber/tchannel-go"
 )
 

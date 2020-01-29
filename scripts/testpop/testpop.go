@@ -30,9 +30,9 @@ import (
 
 	"github.com/cactus/go-statsd-client/statsd"
 	"github.com/uber-common/bark"
-	"github.com/uber/ringpop-go"
-	"github.com/uber/ringpop-go/discovery/jsonfile"
-	"github.com/uber/ringpop-go/swim"
+	"github.com/temporalio/ringpop-go"
+	"github.com/temporalio/ringpop-go/discovery/jsonfile"
+	"github.com/temporalio/ringpop-go/swim"
 
 	log "github.com/sirupsen/logrus"
 	"github.com/uber/tchannel-go"

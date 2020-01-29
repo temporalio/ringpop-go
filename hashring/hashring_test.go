@@ -27,9 +27,9 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/uber/ringpop-go/events"
-	eventsmocks "github.com/uber/ringpop-go/events/test/mocks"
-	"github.com/uber/ringpop-go/membership"
+	"github.com/temporalio/ringpop-go/events"
+	eventsmocks "github.com/temporalio/ringpop-go/events/test/mocks"
+	"github.com/temporalio/ringpop-go/membership"
 
 	"github.com/dgryski/go-farm"
 	"github.com/stretchr/testify/assert"

@@ -26,7 +26,7 @@ import (
 
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/suite"
-	"github.com/uber/ringpop-go/events/test/mocks"
+	"github.com/temporalio/ringpop-go/events/test/mocks"
 	"github.com/uber/tchannel-go"
 )
 

@@ -4,7 +4,7 @@ import (
 	"errors"
 	"strings"
 
-	"github.com/uber/ringpop-go/util"
+	"github.com/temporalio/ringpop-go/util"
 )
 
 var (

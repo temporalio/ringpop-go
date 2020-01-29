@@ -18,7 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-//go:generate thrift-gen --generateThrift --outputDir gen-go --template github.com/uber/ringpop-go/ringpop.thrift-gen --inputFile role.thrift
+//go:generate thrift-gen --generateThrift --outputDir gen-go --template github.com/temporalio/ringpop-go/ringpop.thrift-gen --inputFile role.thrift
 
 package main
 
@@ -27,10 +27,10 @@ import (
 
 	log "github.com/sirupsen/logrus"
 	"github.com/uber-common/bark"
-	"github.com/uber/ringpop-go"
-	"github.com/uber/ringpop-go/discovery/jsonfile"
-	gen "github.com/uber/ringpop-go/examples/role-labels/gen-go/role"
-	"github.com/uber/ringpop-go/swim"
+	"github.com/temporalio/ringpop-go"
+	"github.com/temporalio/ringpop-go/discovery/jsonfile"
+	gen "github.com/temporalio/ringpop-go/examples/role-labels/gen-go/role"
+	"github.com/temporalio/ringpop-go/swim"
 	"github.com/uber/tchannel-go"
 	"github.com/uber/tchannel-go/thrift"
 )

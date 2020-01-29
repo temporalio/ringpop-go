@@ -26,8 +26,8 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
-	"github.com/uber/ringpop-go/events"
-	"github.com/uber/ringpop-go/util"
+	"github.com/temporalio/ringpop-go/events"
+	"github.com/temporalio/ringpop-go/util"
 	"github.com/uber/tchannel-go"
 )
 

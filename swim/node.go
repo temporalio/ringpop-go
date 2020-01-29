@@ -25,17 +25,17 @@ import (
 	"sync"
 	"time"
 
-	"github.com/uber/ringpop-go/membership"
+	"github.com/temporalio/ringpop-go/membership"
 
-	"github.com/uber/ringpop-go/discovery"
-	"github.com/uber/ringpop-go/events"
+	"github.com/temporalio/ringpop-go/discovery"
+	"github.com/temporalio/ringpop-go/events"
 
 	"github.com/benbjohnson/clock"
 	"github.com/rcrowley/go-metrics"
 	log "github.com/uber-common/bark"
-	"github.com/uber/ringpop-go/logging"
-	"github.com/uber/ringpop-go/shared"
-	"github.com/uber/ringpop-go/util"
+	"github.com/temporalio/ringpop-go/logging"
+	"github.com/temporalio/ringpop-go/shared"
+	"github.com/temporalio/ringpop-go/util"
 )
 
 var (

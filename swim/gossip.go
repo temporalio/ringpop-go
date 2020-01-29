@@ -28,7 +28,7 @@ import (
 
 	"github.com/rcrowley/go-metrics"
 	log "github.com/uber-common/bark"
-	"github.com/uber/ringpop-go/logging"
+	"github.com/temporalio/ringpop-go/logging"
 )
 
 // Gossip handles the protocol period of the SWIM protocol

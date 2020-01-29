@@ -1,8 +1,9 @@
 package pingpong
 
-import "github.com/stretchr/testify/mock"
-
-import "github.com/uber/tchannel-go/thrift"
+import (
+	"github.com/stretchr/testify/mock"
+	"github.com/uber/tchannel-go/thrift"
+)
 
 type MockTChanPingPong struct {
 	mock.Mock

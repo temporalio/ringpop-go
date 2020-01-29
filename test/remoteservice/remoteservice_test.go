@@ -4,15 +4,15 @@ import (
 	"testing"
 	"time"
 
-	"github.com/uber/ringpop-go/forward"
+	"github.com/temporalio/ringpop-go/forward"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
-	"github.com/uber/ringpop-go/router"
-	"github.com/uber/ringpop-go/test/mocks"
-	. "github.com/uber/ringpop-go/test/remoteservice/gen/go/remoteservice"
-	shared "github.com/uber/ringpop-go/test/remoteservice/gen/go/shared"
-	servicemocks "github.com/uber/ringpop-go/test/remoteservice/mocks"
+	"github.com/temporalio/ringpop-go/router"
+	"github.com/temporalio/ringpop-go/test/mocks"
+	. "github.com/temporalio/ringpop-go/test/remoteservice/gen/go/remoteservice"
+	shared "github.com/temporalio/ringpop-go/test/remoteservice/gen/go/shared"
+	servicemocks "github.com/temporalio/ringpop-go/test/remoteservice/mocks"
 	"github.com/uber/tchannel-go"
 	"github.com/uber/tchannel-go/thrift"
 )
@@ -20,7 +20,7 @@ import (
 var _ = shared.GoUnusedProtection__
 
 //go:generate mkdir -p gen/go
-//go:generate thrift-gen --generateThrift --outputDir gen/go --inputFile remoteservice.thrift --template github.com/uber/ringpop-go/ringpop.thrift-gen -packagePrefix github.com/uber/ringpop-go/test/remoteservice/gen/go/
+//go:generate thrift-gen --generateThrift --outputDir gen/go --inputFile remoteservice.thrift --template github.com/temporalio/ringpop-go/ringpop.thrift-gen -packagePrefix github.com/temporalio/ringpop-go/test/remoteservice/gen/go/
 //go:generate mockery -dir=gen/go/remoteservice -name=TChanRemoteService
 
 func TestNewRingpopRemoteServiceAdapter(t *testing.T) {

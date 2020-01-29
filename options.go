@@ -26,12 +26,12 @@ import (
 
 	"github.com/benbjohnson/clock"
 	log "github.com/uber-common/bark"
-	"github.com/uber/ringpop-go/hashring"
-	"github.com/uber/ringpop-go/logging"
-	"github.com/uber/ringpop-go/membership"
-	"github.com/uber/ringpop-go/shared"
-	"github.com/uber/ringpop-go/swim"
-	"github.com/uber/ringpop-go/util"
+	"github.com/temporalio/ringpop-go/hashring"
+	"github.com/temporalio/ringpop-go/logging"
+	"github.com/temporalio/ringpop-go/membership"
+	"github.com/temporalio/ringpop-go/shared"
+	"github.com/temporalio/ringpop-go/swim"
+	"github.com/temporalio/ringpop-go/util"
 )
 
 type configuration struct {

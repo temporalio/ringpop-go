@@ -31,10 +31,10 @@ import (
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/suite"
 	"github.com/uber-common/bark"
-	"github.com/uber/ringpop-go/discovery/statichosts"
-	"github.com/uber/ringpop-go/logging"
-	"github.com/uber/ringpop-go/shared"
-	"github.com/uber/ringpop-go/test/mocks/logger"
+	"github.com/temporalio/ringpop-go/discovery/statichosts"
+	"github.com/temporalio/ringpop-go/logging"
+	"github.com/temporalio/ringpop-go/shared"
+	"github.com/temporalio/ringpop-go/test/mocks/logger"
 	"github.com/uber/tchannel-go"
 )
 

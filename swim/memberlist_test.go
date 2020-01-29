@@ -24,9 +24,9 @@ import (
 	"sort"
 	"testing"
 
-	"github.com/uber/ringpop-go/events"
-	"github.com/uber/ringpop-go/membership"
-	"github.com/uber/ringpop-go/util"
+	"github.com/temporalio/ringpop-go/events"
+	"github.com/temporalio/ringpop-go/membership"
+	"github.com/temporalio/ringpop-go/util"
 
 	"github.com/benbjohnson/clock"
 	"github.com/stretchr/testify/suite"

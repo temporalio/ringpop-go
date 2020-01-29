@@ -1,9 +1,10 @@
 package mocks
 
-import "github.com/uber/ringpop-go/swim"
-import "github.com/stretchr/testify/mock"
-
-import "github.com/uber/ringpop-go/events"
+import (
+	"github.com/stretchr/testify/mock"
+	"github.com/temporalio/ringpop-go/swim"
+	"github.com/temporalio/ringpop-go/events"
+)
 
 type SwimNode struct {
 	mock.Mock

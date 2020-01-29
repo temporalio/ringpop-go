@@ -23,9 +23,9 @@ package router
 import (
 	"sync"
 
-	"github.com/uber/ringpop-go"
-	"github.com/uber/ringpop-go/events"
-	"github.com/uber/ringpop-go/swim"
+	"github.com/temporalio/ringpop-go"
+	"github.com/temporalio/ringpop-go/events"
+	"github.com/temporalio/ringpop-go/swim"
 	"github.com/uber/tchannel-go"
 	"github.com/uber/tchannel-go/thrift"
 )

@@ -26,11 +26,11 @@ import (
 
 	log "github.com/sirupsen/logrus"
 	"github.com/uber-common/bark"
-	"github.com/uber/ringpop-go"
-	"github.com/uber/ringpop-go/discovery/jsonfile"
-	gen "github.com/uber/ringpop-go/examples/ping-thrift/gen-go/ping"
-	"github.com/uber/ringpop-go/forward"
-	"github.com/uber/ringpop-go/swim"
+	"github.com/temporalio/ringpop-go"
+	"github.com/temporalio/ringpop-go/discovery/jsonfile"
+	gen "github.com/temporalio/ringpop-go/examples/ping-thrift/gen-go/ping"
+	"github.com/temporalio/ringpop-go/forward"
+	"github.com/temporalio/ringpop-go/swim"
 	"github.com/uber/tchannel-go"
 	"github.com/uber/tchannel-go/thrift"
 )

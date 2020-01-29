@@ -30,8 +30,8 @@ import (
 	"github.com/stretchr/testify/require"
 
 	"github.com/stretchr/testify/assert"
-	"github.com/uber/ringpop-go/discovery/statichosts"
-	"github.com/uber/ringpop-go/events"
+	"github.com/temporalio/ringpop-go/discovery/statichosts"
+	"github.com/temporalio/ringpop-go/events"
 )
 
 // TestPartitionHealWithFaulties creates two partitions A and B where A sees B

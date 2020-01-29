@@ -1,7 +1,9 @@
 package mocks
 
-import "github.com/uber/ringpop-go/events"
-import "github.com/stretchr/testify/mock"
+import (
+	"github.com/stretchr/testify/mock"
+	"github.com/temporalio/ringpop-go/events"
+)
 
 type EventListener struct {
 	mock.Mock
