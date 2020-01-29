@@ -5,7 +5,7 @@
 set -e
 
 
-read -p "This git resets, cleans, builds and tests both unit tests and examples.\n Are you sure? " -n 1 -r
+read -p "This git resets, cleans, builds and tests both unit tests and examples. Are you sure?" -n 1 -r
 echo    # (optional) move to a new line
 if [[ $REPLY =~ ^[Yy]$ ]]
 then
