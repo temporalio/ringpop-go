@@ -54,13 +54,17 @@ mocks:
 
 dev_deps:
 	command -v pip >/dev/null 2>&1 || { echo >&2 "'pip' required but not found. Please install. Aborting."; exit 1; }
+
 	pip install cram
+	command -v cram >/dev/null 2>&1 || { echo >&2 "'cram' required but not found. Please install. Aborting."; exit 1; }
+
 	pip install virtualenv
+	command -v virtualenv >/dev/null 2>&1 || { echo >&2 "'virtualenv' required but not found. Please install. Aborting."; exit 1; }
+
 	pip install npm
-
 	command -v npm >/dev/null 2>&1 || { echo >&2 "'npm' required but not found. Please install. Aborting."; exit 1; }
-	npm install -g tcurl@4.22.0
 
+	npm install -g tcurl@4.22.0
 	command -v tcurl >/dev/null 2>&1 || { echo >&2 "'tcurl' installed but not found on path.  Aborting."; exit 1; }
 
 	go get -u github.com/uber/tchannel-go/thrift/thrift-gen
@@ -73,6 +77,8 @@ dev_deps:
 	command -v thrift >/dev/null 2>&1 || { echo >&2 "'thrift' installed but not found on path. Aborting."; exit 1; }
 
 	./scripts/go-get-version.sh github.com/vektra/mockery/.../@130a05e
+	command -v mockery >/dev/null 2>&1 || { echo >&2 "'mockery' installed but not found on path. Aborting."; exit 1; }
+
 
 setup: dev_deps
 	glide install
