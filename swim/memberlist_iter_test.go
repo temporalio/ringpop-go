@@ -24,7 +24,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/suite"
-	"github.com/uber/ringpop-go/util"
+	"github.com/temporalio/ringpop-go/util"
 )
 
 type MemberlistIterTestSuite struct {

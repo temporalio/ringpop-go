@@ -25,7 +25,7 @@ import (
 
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/suite"
-	"github.com/uber/ringpop-go/test/mocks/logger"
+	"github.com/temporalio/ringpop-go/test/mocks/logger"
 )
 
 type DefaultLoggingTestSuite struct {

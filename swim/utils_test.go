@@ -30,10 +30,10 @@ import (
 	"github.com/benbjohnson/clock"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"github.com/uber/ringpop-go/discovery/statichosts"
-	"github.com/uber/ringpop-go/events"
-	"github.com/uber/ringpop-go/shared"
-	"github.com/uber/ringpop-go/util"
+	"github.com/temporalio/ringpop-go/discovery/statichosts"
+	"github.com/temporalio/ringpop-go/events"
+	"github.com/temporalio/ringpop-go/shared"
+	"github.com/temporalio/ringpop-go/util"
 	"github.com/uber/tchannel-go"
 )
 

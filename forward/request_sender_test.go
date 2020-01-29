@@ -25,9 +25,9 @@ import (
 
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/suite"
-	"github.com/uber/ringpop-go/events"
-	"github.com/uber/ringpop-go/shared"
-	"github.com/uber/ringpop-go/test/mocks/logger"
+	"github.com/temporalio/ringpop-go/events"
+	"github.com/temporalio/ringpop-go/shared"
+	"github.com/temporalio/ringpop-go/test/mocks/logger"
 	"github.com/uber/tchannel-go"
 )
 

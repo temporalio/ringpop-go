@@ -11,7 +11,7 @@ declare ringpop_common_branch="master"
 #
 fetch-ringpop-common() {
     if [ ! -e "$ringpop_common_dir" ]; then
-        run git clone --depth=1 https://github.com/uber/ringpop-common.git "$ringpop_common_dir" --branch "$ringpop_common_branch"
+        run git clone --depth=1 https://github.com/temporalio/ringpop-common.git "$ringpop_common_dir" --branch "$ringpop_common_branch"
     fi
 
     run cd "$ringpop_common_dir"

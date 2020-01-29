@@ -27,10 +27,10 @@ import (
 	"strconv"
 	"sync"
 
-	"github.com/uber/ringpop-go/membership"
+	"github.com/temporalio/ringpop-go/membership"
 
 	"github.com/dgryski/go-farm"
-	"github.com/uber/ringpop-go/util"
+	"github.com/temporalio/ringpop-go/util"
 )
 
 const (

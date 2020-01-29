@@ -28,8 +28,8 @@ import (
 	"testing"
 	"time"
 
-	events "github.com/uber/ringpop-go/events/test/mocks"
-	"github.com/uber/ringpop-go/test/thrift/pingpong"
+	events "github.com/temporalio/ringpop-go/events/test/mocks"
+	"github.com/temporalio/ringpop-go/test/thrift/pingpong"
 
 	athrift "github.com/apache/thrift/lib/go/thrift"
 	"github.com/stretchr/testify/assert"

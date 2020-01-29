@@ -7,7 +7,7 @@ addons:
     packages:
     - python-virtualenv
 
-go_import_path: github.com/uber/ringpop-go
+go_import_path: github.com/temporalio/ringpop-go
 
 install:
   - go get -u github.com/Masterminds/glide

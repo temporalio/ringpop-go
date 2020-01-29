@@ -1,9 +1,11 @@
 package mocks
 
-import "github.com/uber-common/bark"
-import "github.com/stretchr/testify/mock"
+import (
+	"time"
 
-import "time"
+	"github.com/stretchr/testify/mock"
+	"github.com/uber-common/bark"
+)
 
 type StatsReporter struct {
 	mock.Mock

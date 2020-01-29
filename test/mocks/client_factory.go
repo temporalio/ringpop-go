@@ -1,8 +1,9 @@
 package mocks
 
-import "github.com/stretchr/testify/mock"
-
-import "github.com/uber/tchannel-go/thrift"
+import (
+	"github.com/stretchr/testify/mock"
+	"github.com/uber/tchannel-go/thrift"
+)
 
 type ClientFactory struct {
 	mock.Mock

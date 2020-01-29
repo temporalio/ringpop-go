@@ -1,4 +1,4 @@
-package: github.com/uber/ringpop-go
+package: github.com/temporalio/ringpop-go
 import:
 - package: github.com/sirupsen/logrus
 - package: github.com/apache/thrift

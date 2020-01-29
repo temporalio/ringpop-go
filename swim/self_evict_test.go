@@ -27,7 +27,7 @@ import (
 
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/suite"
-	eventsmocks "github.com/uber/ringpop-go/events/test/mocks"
+	eventsmocks "github.com/temporalio/ringpop-go/events/test/mocks"
 )
 
 type SelfEvictTestSuite struct {

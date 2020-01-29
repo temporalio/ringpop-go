@@ -26,8 +26,8 @@ import (
 	"time"
 
 	log "github.com/uber-common/bark"
-	"github.com/uber/ringpop-go/logging"
-	"github.com/uber/ringpop-go/util"
+	"github.com/temporalio/ringpop-go/logging"
+	"github.com/temporalio/ringpop-go/util"
 )
 
 // discoverProviderHealer attempts to heal a ringpop partition by consulting

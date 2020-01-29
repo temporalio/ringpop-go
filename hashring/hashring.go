@@ -27,9 +27,9 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/uber/ringpop-go/events"
-	"github.com/uber/ringpop-go/logging"
-	"github.com/uber/ringpop-go/membership"
+	"github.com/temporalio/ringpop-go/events"
+	"github.com/temporalio/ringpop-go/logging"
+	"github.com/temporalio/ringpop-go/membership"
 
 	"github.com/uber-common/bark"
 )

@@ -14,13 +14,14 @@ Getting started
 To install ringpop-go:
 
 ```
-go get github.com/uber/ringpop-go
+go get github.com/temporalio/ringpop-go
 ```
 
 Developing
 ----------
 
-First make certain that `thrift` (OSX: `brew install thrift`) and `glide` are
+First make certain that `thrift` v0.9.3
+(OSX: `brew install https://gist.githubusercontent.com/chrislusf/8b4e7c19551ba220232f037b43c0eaf3/raw/01465b867b8ef9af7c7c3fa830c83666c825122d/thrift.rb`) and `glide` are
 in your path (above). Then,
 
 ```
@@ -29,7 +30,7 @@ make setup
 
 to install remaining golang dependencies and install the pre-commit hook.
 
-Finally, run the tests by doing:
+Finally, run the tests by doing (note ensure you have enough file descriptors using `ulimit -n` - atleast 8192 reccomended.):
 
 ```
 make test

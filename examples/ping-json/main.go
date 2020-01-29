@@ -26,10 +26,10 @@ import (
 
 	log "github.com/sirupsen/logrus"
 	"github.com/uber-common/bark"
-	"github.com/uber/ringpop-go"
-	"github.com/uber/ringpop-go/discovery/jsonfile"
-	"github.com/uber/ringpop-go/forward"
-	"github.com/uber/ringpop-go/swim"
+	"github.com/temporalio/ringpop-go"
+	"github.com/temporalio/ringpop-go/discovery/jsonfile"
+	"github.com/temporalio/ringpop-go/forward"
+	"github.com/temporalio/ringpop-go/swim"
 	"github.com/uber/tchannel-go"
 	"github.com/uber/tchannel-go/json"
 	"golang.org/x/net/context"
@@ -68,7 +68,7 @@ func (w *worker) RegisterPing() error {
 	hmap := map[string]interface{}{"/ping": w.PingHandler}
 
 	return json.Register(w.channel, hmap, func(ctx context.Context, err error) {
-		w.logger.Debug("error occured: %v", err)
+		w.logger.Debug("error occurred", err)
 	})
 }
 
