@@ -661,6 +661,53 @@ func (s *RingpopTestSuite) TestGetReachableMembersNotMePredicate() {
 	s.Equal([]string{}, result)
 }
 
+func (s *RingpopTestSuite) TestGetReachableMemberObjectsNotReady() {
+	result, err := s.ringpop.GetReachableMemberObjects()
+	s.Error(err)
+	s.Nil(result)
+}
+
+func (s *RingpopTestSuite) TestGetReachableMemberObjects() {
+	createSingleNodeCluster(s.ringpop)
+
+	address, err := s.ringpop.WhoAmI()
+	s.Require().NoError(err)
+
+	mutableLabels, err := s.ringpop.Labels()
+	s.Require().NoError(err)
+
+	err = mutableLabels.Set("foo", "bar")
+	s.Require().NoError(err)
+
+	member := swim.Member{
+		Address:     address,
+		Status:      "alive",
+		Incarnation: 0,
+		Labels: swim.LabelMap{
+			"foo": "bar",
+		},
+	}
+
+	result, err := s.ringpop.GetReachableMemberObjects()
+	s.NoError(err)
+	s.Equal([]swim.Member{member}, result)
+}
+
+func (s *RingpopTestSuite) TestGetReachableMemberObjectsNotMePredicate() {
+	createSingleNodeCluster(s.ringpop)
+
+	address, err := s.ringpop.WhoAmI()
+	s.Require().NoError(err)
+
+	// get reachable members without me (non in this test)
+	result, err := s.ringpop.GetReachableMemberObjects(func(member swim.Member) bool {
+		return member.Address != address
+	})
+
+	s.NoError(err)
+	s.Equal([]swim.Member{}, result)
+}
+
 func (s *RingpopTestSuite) TestCountReachableMembersNotReady() {
 	_, err := s.ringpop.CountReachableMembers()
 	s.Error(err)

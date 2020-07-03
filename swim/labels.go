@@ -22,7 +22,7 @@ var (
 	DefaultLabelOptions = LabelOptions{
 		KeySize:   32,
 		ValueSize: 128,
-		Count:     5,
+		Count:     10,
 	}
 
 	// ErrLabelSizeExceeded indicates that an operation on labels would exceed

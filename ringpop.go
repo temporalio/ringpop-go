@@ -57,6 +57,7 @@ type Interface interface {
 	Lookup(key string) (string, error)
 	LookupN(key string, n int) ([]string, error)
 	GetReachableMembers(predicates ...swim.MemberPredicate) ([]string, error)
+	GetReachableMemberObjects(predicates ...swim.MemberPredicate) ([]swim.Member, error)
 	CountReachableMembers(predicates ...swim.MemberPredicate) (int, error)
 
 	HandleOrForward(key string, request []byte, response *[]byte, service, endpoint string, format tchannel.Format, opts *forward.Options) (bool, error)
@@ -707,20 +708,29 @@ func (rp *Ringpop) ringEvent(e interface{}) {
 	rp.HandleEvent(e)
 }
 
-// GetReachableMembers returns a slice of members currently in this instance's
+// GetReachableMembers returns a slice of hostports currently in this instance's
 // active membership list that match all provided predicates.
 func (rp *Ringpop) GetReachableMembers(predicates ...swim.MemberPredicate) ([]string, error) {
-	if !rp.Ready() {
-		return nil, ErrNotBootstrapped
+	members, err := rp.GetReachableMemberObjects(predicates...)
+	if err != nil {
+		return nil, err
 	}
-
-	members := rp.node.GetReachableMembers(predicates...)
 
 	addresses := make([]string, 0, len(members))
 	for _, member := range members {
 		addresses = append(addresses, member.Address)
 	}
 	return addresses, nil
+}
+
+// GetReachableMemberObjects returns a slice of members currently in this instance's
+// active membership list that match all provided predicates.
+func (rp *Ringpop) GetReachableMemberObjects(predicates ...swim.MemberPredicate) ([]swim.Member, error) {
+	if !rp.Ready() {
+		return nil, ErrNotBootstrapped
+	}
+
+	return rp.node.GetReachableMembers(predicates...), nil
 }
 
 // CountReachableMembers returns the number of members currently in this
