@@ -186,6 +186,29 @@ func (_m *Ringpop) GetReachableMembers(predicates ...swim.MemberPredicate) ([]st
 	return r0, r1
 }
 
+// GetReachableMemberObjects provides a mock function with given fields: predicates
+func (_m *Ringpop) GetReachableMemberObjects(predicates ...swim.MemberPredicate) ([]swim.Member, error) {
+	ret := _m.Called(predicates)
+
+	var r0 []swim.Member
+	if rf, ok := ret.Get(0).(func(...swim.MemberPredicate) []swim.Member); ok {
+		r0 = rf(predicates...)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]swim.Member)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(...swim.MemberPredicate) error); ok {
+		r1 = rf(predicates...)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // CountReachableMembers provides a mock function with given fields: predicates
 func (_m *Ringpop) CountReachableMembers(predicates ...swim.MemberPredicate) (int, error) {
 	ret := _m.Called(predicates)
