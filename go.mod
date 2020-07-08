@@ -6,7 +6,7 @@ require (
 	github.com/apache/thrift v0.0.0-20150905105024-5bc8b5a3a5da
 	github.com/benbjohnson/clock v0.0.0-20160125162948-a620c1cc9866
 	github.com/bmizerany/perks v0.0.0-20141205001514-d9a9656a3a4b // indirect
-	github.com/cactus/go-statsd-client v3.1.0+incompatible
+	github.com/cactus/go-statsd-client/statsd v0.0.0-20200423205355-cb0885a1018c
 	github.com/codahale/hdrhistogram v0.0.0-20161010025455-3a0bb77429bd // indirect
 	github.com/dgryski/go-farm v0.0.0-20140601200337-fc41e106ee0e
 	github.com/opentracing/opentracing-go v1.1.0 // indirect
