@@ -7,7 +7,6 @@ NOVENDOR = $(shell GO15VENDOREXPERIMENT=1 glide novendor)
 
 export PATH := $(shell pwd)/scripts/travis/thrift-release/linux-x86_64:$(PATH)
 export PATH := $(shell pwd)/scripts/travis/thrift-gen-release/linux-x86_64:$(PATH)
-export PATH := $(GOPATH)/bin:$(PATH)
 
 export ROOT_DIR:=$(shell dirname $(realpath $(firstword $(MAKEFILE_LIST))))
 export GOPKG=$(shell go list)
@@ -67,23 +66,24 @@ dev_deps:
 	npm install -g tcurl@4.22.0
 	command -v tcurl >/dev/null 2>&1 || { echo >&2 "'tcurl' installed but not found on path.  Aborting."; exit 1; }
 
-	go get -u github.com/uber/tchannel-go/thrift/thrift-gen
+    # TODO: Change GIT-COMMIT-HERE to the commit for tchannel-go v0.15.0
+	go get -u github.com/temporalio/tchannel-go/thrift/thrift-gen@GIT-COMMIT-HERE
 	command -v thrift-gen >/dev/null 2>&1 || { echo >&2 "'thrift-gen' installed but not found on path.  Aborting."; exit 1; }
 
 	go get -u golang.org/x/lint/golint...
 
 	# Thrift commit matches glide version
-	go get -u github.com/apache/thrift/lib/go/thrift@5bc8b5a3a5da507b6f87436ca629be664496a69f
+	go get -u github.com/apache/thrift@8317ec43ea2425b6f8e24e4dc4f5b2360f717eb4
 	command -v thrift >/dev/null 2>&1 || { echo >&2 "'thrift' installed but not found on path. Aborting."; exit 1; }
 
-	./scripts/go-get-version.sh github.com/vektra/mockery/.../@130a05e
+	go get -u github.com/vektra/mockery/@130a05e
 	command -v mockery >/dev/null 2>&1 || { echo >&2 "'mockery' installed but not found on path. Aborting."; exit 1; }
 
 
 setup: dev_deps
 	@if ! which thrift | grep -q /; then \
 		echo "thrift not in PATH. (brew install thrift?)" >&2; \
- 		exit 1; \
+		exit 1; \
 	fi
 
 	ln -sf ../../scripts/pre-commit .git/hooks/pre-commit
@@ -92,7 +92,7 @@ setup: dev_deps
 # being created during these phases
 test: test-unit test-race test-examples lint test-integration
 
-test-integration: vendor
+test-integration:
 	test/run-integration-tests
 
 test-unit:
@@ -105,9 +105,6 @@ test-examples: vendor _venv/bin/cram
 test-race: vendor
 	go generate $(NOVENDOR)
 	test/go-test-prettify -race $(NOVENDOR)
-
-vendor:
-	$(error run 'make setup' first)
 
 _venv/bin/cram:
 	./scripts/travis/get-cram.sh

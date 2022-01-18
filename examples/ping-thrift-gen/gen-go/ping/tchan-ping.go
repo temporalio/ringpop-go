@@ -88,7 +88,7 @@ func (s *tchanPingPongServiceServer) handlePing(ctx thrift.Context, protocol ath
 	var req PingPongServicePingArgs
 	var res PingPongServicePingResult
 
-	if err := req.Read(protocol); err != nil {
+	if err := req.Read(ctx, protocol); err != nil {
 		return false, nil, err
 	}
 

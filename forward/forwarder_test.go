@@ -22,6 +22,7 @@ package forward
 
 import (
 	"bytes"
+	"context"
 	json2 "encoding/json"
 	"errors"
 	"sync"
@@ -38,7 +39,6 @@ import (
 	"github.com/uber/tchannel-go"
 	"github.com/uber/tchannel-go/json"
 	"github.com/uber/tchannel-go/thrift"
-	"golang.org/x/net/context"
 )
 
 type ContextKey string
@@ -191,7 +191,7 @@ func (s *ForwarderTestSuite) TestForwardThrift() {
 		},
 	}
 
-	bytes, err := SerializeThrift(request)
+	bytes, err := SerializeThrift(context.Background(), request)
 	s.NoError(err, "expected ping to be serialized")
 
 	res, err := s.forwarder.ForwardRequest(bytes, dest, "test", "PingPong::Ping", []string{"reachable"},
@@ -200,7 +200,7 @@ func (s *ForwarderTestSuite) TestForwardThrift() {
 
 	var response pingpong.PingPongPingResult
 
-	err = DeserializeThrift(res, &response)
+	err = DeserializeThrift(context.Background(), res, &response)
 	s.NoError(err)
 
 	s.Equal("correct pinging host", response.Success.Source)
@@ -216,7 +216,7 @@ func (s *ForwarderTestSuite) TestForwardThriftWithCtxOption() {
 		},
 	}
 
-	bytes1, err := SerializeThrift(request)
+	bytes1, err := SerializeThrift(context.Background(), request)
 	s.NoError(err, "expected ping to be serialized")
 
 
@@ -231,7 +231,7 @@ func (s *ForwarderTestSuite) TestForwardThriftWithCtxOption() {
 
 	var response pingpong.PingPongPingResult
 
-	err = DeserializeThrift(res, &response)
+	err = DeserializeThrift(context.Background(), res, &response)
 	s.NoError(err)
 
 	s.Equal("correct pinging host", response.Success.Source)
@@ -247,7 +247,7 @@ func (s *ForwarderTestSuite) TestForwardThriftErrorResponse() {
 		},
 	}
 
-	bytes, err := SerializeThrift(request)
+	bytes, err := SerializeThrift(context.Background(), request)
 	s.NoError(err, "expected ping to be serialized")
 
 	res, err := s.forwarder.ForwardRequest(bytes, dest, "test", "PingPong::Ping", []string{"reachable"},
@@ -256,7 +256,7 @@ func (s *ForwarderTestSuite) TestForwardThriftErrorResponse() {
 
 	var response pingpong.PingPongPingResult
 
-	err = DeserializeThrift(res, &response)
+	err = DeserializeThrift(context.Background(), res, &response)
 	s.NoError(err)
 
 	s.NotNil(response.PingError, "expected a pingerror")
@@ -430,16 +430,16 @@ func TestDeleteForwardedHeader(t *testing.T) {
 // of that struct using the thrift binary protocol. This is a temporary
 // measure before frames can be forwarded directly past the endpoint to the proper
 // destinaiton.
-func SerializeThrift(s athrift.TStruct) ([]byte, error) {
+func SerializeThrift(ctx context.Context, s athrift.TStruct) ([]byte, error) {
 	var b []byte
 	var buffer = bytes.NewBuffer(b)
 
 	transport := athrift.NewStreamTransportW(buffer)
-	if err := s.Write(athrift.NewTBinaryProtocolTransport(transport)); err != nil {
+	if err := s.Write(ctx, athrift.NewTBinaryProtocolTransport(transport)); err != nil {
 		return nil, err
 	}
 
-	if err := transport.Flush(); err != nil {
+	if err := transport.Flush(ctx); err != nil {
 		return nil, err
 	}
 	return buffer.Bytes(), nil
@@ -449,8 +449,8 @@ func SerializeThrift(s athrift.TStruct) ([]byte, error) {
 // given thrift struct using the thrift binary protocol. This is a temporary
 // measure before frames can be forwarded directly past the endpoint to the proper
 // destinaiton.
-func DeserializeThrift(b []byte, s athrift.TStruct) error {
+func DeserializeThrift(ctx context.Context, b []byte, s athrift.TStruct) error {
 	reader := bytes.NewReader(b)
 	transport := athrift.NewStreamTransportR(reader)
-	return s.Read(athrift.NewTBinaryProtocolTransport(transport))
+	return s.Read(ctx, athrift.NewTBinaryProtocolTransport(transport))
 }

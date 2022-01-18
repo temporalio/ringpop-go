@@ -108,7 +108,7 @@ func (s *tchanRoleServiceServer) handleGetMembers(ctx thrift.Context, protocol a
 	var req RoleServiceGetMembersArgs
 	var res RoleServiceGetMembersResult
 
-	if err := req.Read(protocol); err != nil {
+	if err := req.Read(ctx, protocol); err != nil {
 		return false, nil, err
 	}
 
@@ -128,7 +128,7 @@ func (s *tchanRoleServiceServer) handleSetRole(ctx thrift.Context, protocol athr
 	var req RoleServiceSetRoleArgs
 	var res RoleServiceSetRoleResult
 
-	if err := req.Read(protocol); err != nil {
+	if err := req.Read(ctx, protocol); err != nil {
 		return false, nil, err
 	}
 

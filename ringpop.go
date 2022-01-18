@@ -25,6 +25,7 @@ package ringpop
 
 import (
 	"bytes"
+	"context"
 	"errors"
 	"fmt"
 	"sync"
@@ -819,16 +820,16 @@ func (rp *Ringpop) Labels() (*swim.NodeLabels, error) {
 // of that struct using the thrift binary protocol. This is a temporary
 // measure before frames can forwarded directly past the endpoint to the proper
 // destinaiton.
-func SerializeThrift(s athrift.TStruct) ([]byte, error) {
+func SerializeThrift(ctx context.Context, s athrift.TStruct) ([]byte, error) {
 	var b []byte
 	var buffer = bytes.NewBuffer(b)
 
 	transport := athrift.NewStreamTransportW(buffer)
-	if err := s.Write(athrift.NewTBinaryProtocolTransport(transport)); err != nil {
+	if err := s.Write(ctx, athrift.NewTBinaryProtocolTransport(transport)); err != nil {
 		return nil, err
 	}
 
-	if err := transport.Flush(); err != nil {
+	if err := transport.Flush(ctx); err != nil {
 		return nil, err
 	}
 	return buffer.Bytes(), nil
@@ -838,8 +839,8 @@ func SerializeThrift(s athrift.TStruct) ([]byte, error) {
 // given thrift struct using the thrift binary protocol. This is a temporary
 // measure before frames can forwarded directly past the endpoint to the proper
 // destinaiton.
-func DeserializeThrift(b []byte, s athrift.TStruct) error {
+func DeserializeThrift(ctx context.Context, b []byte, s athrift.TStruct) error {
 	reader := bytes.NewReader(b)
 	transport := athrift.NewStreamTransportR(reader)
-	return s.Read(athrift.NewTBinaryProtocolTransport(transport))
+	return s.Read(ctx, athrift.NewTBinaryProtocolTransport(transport))
 }

@@ -66,7 +66,7 @@ func (w *worker) Ping(ctx thrift.Context, request *gen.Ping) (*gen.Pong, error) 
 	pingArgs := &gen.PingPongServicePingArgs{
 		Request: request,
 	}
-	req, err := ringpop.SerializeThrift(pingArgs)
+	req, err := ringpop.SerializeThrift(ctx, pingArgs)
 	if err != nil {
 		return nil, err
 	}
@@ -86,7 +86,7 @@ func (w *worker) Ping(ctx thrift.Context, request *gen.Ping) (*gen.Pong, error) 
 		}, nil
 	}
 
-	if err := ringpop.DeserializeThrift(res, &pongResult); err != nil {
+	if err := ringpop.DeserializeThrift(ctx, res, &pongResult); err != nil {
 		return nil, err
 	}
 

@@ -129,7 +129,7 @@ func (s *tchanKeyValueServiceServer) handleGet(ctx thrift.Context, protocol athr
 	var req KeyValueServiceGetArgs
 	var res KeyValueServiceGetResult
 
-	if err := req.Read(protocol); err != nil {
+	if err := req.Read(ctx, protocol); err != nil {
 		return false, nil, err
 	}
 
@@ -149,7 +149,7 @@ func (s *tchanKeyValueServiceServer) handleGetAll(ctx thrift.Context, protocol a
 	var req KeyValueServiceGetAllArgs
 	var res KeyValueServiceGetAllResult
 
-	if err := req.Read(protocol); err != nil {
+	if err := req.Read(ctx, protocol); err != nil {
 		return false, nil, err
 	}
 
@@ -169,7 +169,7 @@ func (s *tchanKeyValueServiceServer) handleSet(ctx thrift.Context, protocol athr
 	var req KeyValueServiceSetArgs
 	var res KeyValueServiceSetResult
 
-	if err := req.Read(protocol); err != nil {
+	if err := req.Read(ctx, protocol); err != nil {
 		return false, nil, err
 	}
 
