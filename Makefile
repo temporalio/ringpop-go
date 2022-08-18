@@ -72,7 +72,7 @@ dev_deps:
 	go get -u golang.org/x/lint/golint...
 
 	# Thrift commit matches glide version
-	go get -u github.com/apache/thrift@8317ec43ea2425b6f8e24e4dc4f5b2360f717eb4
+	go get -u github.com/apache/thrift@2a93df80f27739ccabb5b885cb12a8dc7595ecdf
 	command -v thrift >/dev/null 2>&1 || { echo >&2 "'thrift' installed but not found on path. Aborting."; exit 1; }
 
 	go get -u github.com/vektra/mockery/@130a05e
