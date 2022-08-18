@@ -98,10 +98,10 @@ test-unit:
 	go generate $(NOVENDOR)
 	test/go-test-prettify $(NOVENDOR)
 
-test-examples: vendor _venv/bin/cram
+test-examples: _venv/bin/cram
 	. _venv/bin/activate && ./test/run-example-tests
 
-test-race: vendor
+test-race:
 	go generate $(NOVENDOR)
 	test/go-test-prettify -race $(NOVENDOR)
 
