@@ -34,7 +34,7 @@ import (
 	"github.com/temporalio/ringpop-go/events"
 	"github.com/temporalio/ringpop-go/shared"
 	"github.com/temporalio/ringpop-go/util"
-	"github.com/uber/tchannel-go"
+	"github.com/temporalio/tchannel-go"
 )
 
 var testNow = time.Now()

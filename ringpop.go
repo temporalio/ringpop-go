@@ -25,6 +25,7 @@ package ringpop
 
 import (
 	"bytes"
+	"context"
 	"errors"
 	"fmt"
 	"sync"
@@ -42,7 +43,7 @@ import (
 	"github.com/benbjohnson/clock"
 	"github.com/dgryski/go-farm"
 	log "github.com/uber-common/bark"
-	"github.com/uber/tchannel-go"
+	"github.com/temporalio/tchannel-go"
 )
 
 // Interface specifies the public facing methods a user of ringpop is able to
@@ -401,11 +402,11 @@ func (rp *Ringpop) SelfEvict() error {
 	return rp.node.SelfEvict()
 }
 
-//= = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
+// = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
 //
 //	Bootstrap
 //
-//= = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
+// = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
 
 // Bootstrap starts communication for this Ringpop instance.
 //
@@ -449,11 +450,11 @@ func (rp *Ringpop) Ready() bool {
 	return rp.node.Ready()
 }
 
-//= = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
+// = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
 //
 //	SWIM Events
 //
-//= = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
+// = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
 
 // HandleEvent is used to satisfy the swim.EventListener interface. No touchy.
 func (rp *Ringpop) HandleEvent(event events.Event) {
@@ -632,11 +633,11 @@ func (rp *Ringpop) HandleEvent(event events.Event) {
 	}
 }
 
-//= = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
+// = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
 //
 //	Ring
 //
-//= = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
+// = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
 
 // Checksum returns the current checksum of this Ringpop instance's hashring.
 func (rp *Ringpop) Checksum() (uint32, error) {
@@ -742,11 +743,11 @@ func (rp *Ringpop) CountReachableMembers(predicates ...swim.MemberPredicate) (in
 	return rp.node.CountReachableMembers(predicates...), nil
 }
 
-//= = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
+// = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
 //
 //	Stats
 //
-//= = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
+// = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
 
 func (rp *Ringpop) getStatKey(key string) string {
 	rp.stats.Lock()
@@ -760,11 +761,11 @@ func (rp *Ringpop) getStatKey(key string) string {
 	return rpKey
 }
 
-//= = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
+// = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
 //
 //	Forwarding
 //
-//= = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
+// = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
 
 // HandleOrForward returns true if the request should be handled locally, or false
 // if it should be forwarded to a different node. If false is returned, forwarding
@@ -819,16 +820,16 @@ func (rp *Ringpop) Labels() (*swim.NodeLabels, error) {
 // of that struct using the thrift binary protocol. This is a temporary
 // measure before frames can forwarded directly past the endpoint to the proper
 // destinaiton.
-func SerializeThrift(s athrift.TStruct) ([]byte, error) {
+func SerializeThrift(ctx context.Context, s athrift.TStruct) ([]byte, error) {
 	var b []byte
 	var buffer = bytes.NewBuffer(b)
 
 	transport := athrift.NewStreamTransportW(buffer)
-	if err := s.Write(athrift.NewTBinaryProtocolTransport(transport)); err != nil {
+	if err := s.Write(ctx, athrift.NewTBinaryProtocolTransport(transport)); err != nil {
 		return nil, err
 	}
 
-	if err := transport.Flush(); err != nil {
+	if err := transport.Flush(ctx); err != nil {
 		return nil, err
 	}
 	return buffer.Bytes(), nil
@@ -838,8 +839,8 @@ func SerializeThrift(s athrift.TStruct) ([]byte, error) {
 // given thrift struct using the thrift binary protocol. This is a temporary
 // measure before frames can forwarded directly past the endpoint to the proper
 // destinaiton.
-func DeserializeThrift(b []byte, s athrift.TStruct) error {
+func DeserializeThrift(ctx context.Context, b []byte, s athrift.TStruct) error {
 	reader := bytes.NewReader(b)
 	transport := athrift.NewStreamTransportR(reader)
-	return s.Read(athrift.NewTBinaryProtocolTransport(transport))
+	return s.Read(ctx, athrift.NewTBinaryProtocolTransport(transport))
 }

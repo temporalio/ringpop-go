@@ -31,8 +31,8 @@ import (
 	gen "github.com/temporalio/ringpop-go/examples/ping-thrift/gen-go/ping"
 	"github.com/temporalio/ringpop-go/forward"
 	"github.com/temporalio/ringpop-go/swim"
-	"github.com/uber/tchannel-go"
-	"github.com/uber/tchannel-go/thrift"
+	"github.com/temporalio/tchannel-go"
+	"github.com/temporalio/tchannel-go/thrift"
 )
 
 var (
@@ -66,7 +66,7 @@ func (w *worker) Ping(ctx thrift.Context, request *gen.Ping) (*gen.Pong, error) 
 	pingArgs := &gen.PingPongServicePingArgs{
 		Request: request,
 	}
-	req, err := ringpop.SerializeThrift(pingArgs)
+	req, err := ringpop.SerializeThrift(ctx, pingArgs)
 	if err != nil {
 		return nil, err
 	}
@@ -86,7 +86,7 @@ func (w *worker) Ping(ctx thrift.Context, request *gen.Ping) (*gen.Pong, error) 
 		}, nil
 	}
 
-	if err := ringpop.DeserializeThrift(res, &pongResult); err != nil {
+	if err := ringpop.DeserializeThrift(ctx, res, &pongResult); err != nil {
 		return nil, err
 	}
 

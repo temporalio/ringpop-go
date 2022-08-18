@@ -1,6 +1,6 @@
 package shared
 
-import "github.com/uber/tchannel-go"
+import "github.com/temporalio/tchannel-go"
 
 // The TChannel interface defines the dependencies for TChannel in Ringpop.
 type TChannel interface {

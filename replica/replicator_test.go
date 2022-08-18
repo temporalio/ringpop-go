@@ -28,8 +28,8 @@ import (
 	"github.com/stretchr/testify/suite"
 	"github.com/temporalio/ringpop-go/forward"
 	"github.com/temporalio/ringpop-go/shared"
-	"github.com/uber/tchannel-go"
-	"github.com/uber/tchannel-go/json"
+	"github.com/temporalio/tchannel-go"
+	"github.com/temporalio/tchannel-go/json"
 	"golang.org/x/net/context"
 )
 

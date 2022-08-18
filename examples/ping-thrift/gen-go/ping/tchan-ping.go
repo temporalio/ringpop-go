@@ -7,7 +7,7 @@ import (
 	"fmt"
 
 	athrift "github.com/apache/thrift/lib/go/thrift"
-	"github.com/uber/tchannel-go/thrift"
+	"github.com/temporalio/tchannel-go/thrift"
 )
 
 // Interfaces for the service and client for the services defined in the IDL.
@@ -88,7 +88,7 @@ func (s *tchanPingPongServiceServer) handlePing(ctx thrift.Context, protocol ath
 	var req PingPongServicePingArgs
 	var res PingPongServicePingResult
 
-	if err := req.Read(protocol); err != nil {
+	if err := req.Read(ctx, protocol); err != nil {
 		return false, nil, err
 	}
 

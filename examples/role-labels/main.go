@@ -31,8 +31,8 @@ import (
 	"github.com/temporalio/ringpop-go/discovery/jsonfile"
 	gen "github.com/temporalio/ringpop-go/examples/role-labels/gen-go/role"
 	"github.com/temporalio/ringpop-go/swim"
-	"github.com/uber/tchannel-go"
-	"github.com/uber/tchannel-go/thrift"
+	"github.com/temporalio/tchannel-go"
+	"github.com/temporalio/tchannel-go/thrift"
 )
 
 const (

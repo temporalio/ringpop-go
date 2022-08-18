@@ -28,7 +28,7 @@ import (
 	log "github.com/uber-common/bark"
 	"github.com/temporalio/ringpop-go/logging"
 	"github.com/temporalio/ringpop-go/shared"
-	"github.com/uber/tchannel-go/json"
+	"github.com/temporalio/tchannel-go/json"
 )
 
 // A PingRequest is used to make a ping request to a remote node
@@ -138,7 +138,7 @@ func indirectPing(n *Node, target string, amount int, timeout time.Duration) (re
 }
 
 // sendPingRequests sends ping requests to the target address and returns a channel
-//containing the responses. Responses can be one of type:
+// containing the responses. Responses can be one of type:
 //  (1) error:          if the call to peer failed
 //  (2) PingResponse:   if the peer performed the ping request
 func sendPingRequests(node *Node, target string, size int, timeout time.Duration) <-chan interface{} {

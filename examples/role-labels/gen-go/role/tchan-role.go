@@ -7,7 +7,7 @@ import (
 	"fmt"
 
 	athrift "github.com/apache/thrift/lib/go/thrift"
-	"github.com/uber/tchannel-go/thrift"
+	"github.com/temporalio/tchannel-go/thrift"
 )
 
 // Interfaces for the service and client for the services defined in the IDL.
@@ -108,7 +108,7 @@ func (s *tchanRoleServiceServer) handleGetMembers(ctx thrift.Context, protocol a
 	var req RoleServiceGetMembersArgs
 	var res RoleServiceGetMembersResult
 
-	if err := req.Read(protocol); err != nil {
+	if err := req.Read(ctx, protocol); err != nil {
 		return false, nil, err
 	}
 
@@ -128,7 +128,7 @@ func (s *tchanRoleServiceServer) handleSetRole(ctx thrift.Context, protocol athr
 	var req RoleServiceSetRoleArgs
 	var res RoleServiceSetRoleResult
 
-	if err := req.Read(protocol); err != nil {
+	if err := req.Read(ctx, protocol); err != nil {
 		return false, nil, err
 	}
 
