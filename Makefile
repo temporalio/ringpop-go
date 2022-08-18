@@ -66,8 +66,7 @@ dev_deps:
 	npm install -g tcurl@4.22.0
 	command -v tcurl >/dev/null 2>&1 || { echo >&2 "'tcurl' installed but not found on path.  Aborting."; exit 1; }
 
-    # TODO: Change GIT-COMMIT-HERE to the commit for tchannel-go v0.15.0
-	go get -u github.com/temporalio/tchannel-go/thrift/thrift-gen@GIT-COMMIT-HERE
+	go get -u github.com/temporalio/tchannel-go/thrift/thrift-gen
 	command -v thrift-gen >/dev/null 2>&1 || { echo >&2 "'thrift-gen' installed but not found on path.  Aborting."; exit 1; }
 
 	go get -u golang.org/x/lint/golint...
