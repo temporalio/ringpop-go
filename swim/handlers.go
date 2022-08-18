@@ -24,7 +24,7 @@ import (
 	"errors"
 
 	log "github.com/uber-common/bark"
-	"github.com/uber/tchannel-go/json"
+	"github.com/temporalio/tchannel-go/json"
 	"golang.org/x/net/context"
 )
 

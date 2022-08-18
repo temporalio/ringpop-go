@@ -31,8 +31,8 @@ import (
 	"github.com/temporalio/ringpop-go/logging"
 	"github.com/temporalio/ringpop-go/shared"
 	"github.com/temporalio/ringpop-go/util"
-	"github.com/uber/tchannel-go"
-	"github.com/uber/tchannel-go/thrift"
+	"github.com/temporalio/tchannel-go"
+	"github.com/temporalio/tchannel-go/thrift"
 )
 
 // A Sender is used to route the request to the proper destination,

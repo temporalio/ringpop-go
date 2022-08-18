@@ -36,9 +36,9 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/suite"
-	"github.com/uber/tchannel-go"
-	"github.com/uber/tchannel-go/json"
-	"github.com/uber/tchannel-go/thrift"
+	"github.com/temporalio/tchannel-go"
+	"github.com/temporalio/tchannel-go/json"
+	"github.com/temporalio/tchannel-go/thrift"
 )
 
 type ContextKey string
@@ -218,7 +218,6 @@ func (s *ForwarderTestSuite) TestForwardThriftWithCtxOption() {
 
 	bytes1, err := SerializeThrift(context.Background(), request)
 	s.NoError(err, "expected ping to be serialized")
-
 
 	k := ContextKey("key")
 	ctx := thrift.Wrap(context.WithValue(context.Background(), k, "val"))

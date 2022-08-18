@@ -27,7 +27,7 @@ import (
 	"github.com/stretchr/testify/suite"
 	"github.com/temporalio/ringpop-go/swim"
 	"github.com/temporalio/ringpop-go/test/mocks"
-	"github.com/uber/tchannel-go"
+	"github.com/temporalio/tchannel-go"
 )
 
 type RouterTestSuite struct {

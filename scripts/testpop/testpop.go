@@ -35,7 +35,7 @@ import (
 	"github.com/temporalio/ringpop-go/swim"
 
 	log "github.com/sirupsen/logrus"
-	"github.com/uber/tchannel-go"
+	"github.com/temporalio/tchannel-go"
 )
 
 var (

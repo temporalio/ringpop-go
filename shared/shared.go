@@ -3,7 +3,7 @@ package shared
 import (
 	"time"
 
-	"github.com/uber/tchannel-go"
+	"github.com/temporalio/tchannel-go"
 
 	"golang.org/x/net/context"
 )

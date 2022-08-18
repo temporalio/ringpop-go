@@ -32,7 +32,7 @@ import (
 	"github.com/temporalio/ringpop-go/swim"
 	"github.com/temporalio/ringpop-go/test/mocks"
 	"github.com/temporalio/ringpop-go/test/mocks/logger"
-	"github.com/uber/tchannel-go"
+	"github.com/temporalio/tchannel-go"
 )
 
 type RingpopOptionsTestSuite struct {
