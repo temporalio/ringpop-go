@@ -35,7 +35,7 @@ import (
 	"github.com/temporalio/ringpop-go/membership"
 	"github.com/temporalio/ringpop-go/swim"
 	"github.com/temporalio/ringpop-go/test/mocks"
-	"github.com/uber/tchannel-go"
+	"github.com/temporalio/tchannel-go"
 )
 
 type destroyable interface {
@@ -534,7 +534,7 @@ func (s *RingpopTestSuite) TestChecksum() {
 	s.Equal(ready, s.ringpop.state)
 	checksum, err = s.ringpop.Checksum()
 	s.NoError(err)
-	//s.NotZero(checksum)
+	// s.NotZero(checksum)
 }
 
 // TestApp tests that App() returns the correct app name.

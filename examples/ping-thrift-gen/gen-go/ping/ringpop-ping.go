@@ -9,8 +9,8 @@ import (
 	"github.com/temporalio/ringpop-go"
 	"github.com/temporalio/ringpop-go/forward"
 	"github.com/temporalio/ringpop-go/router"
-	"github.com/uber/tchannel-go"
-	"github.com/uber/tchannel-go/thrift"
+	"github.com/temporalio/tchannel-go"
+	"github.com/temporalio/tchannel-go/thrift"
 )
 
 type RingpopPingPongServiceAdapter struct {
@@ -39,7 +39,7 @@ func (c *PingPongServiceConfiguration) validate() error {
 // NewRingpopPingPongServiceAdapter creates an implementation of the TChanPingPongService interface. This specific implementation will use to configuration provided during construction to deterministically route calls to nodes from a ringpop cluster. The channel should be the channel on which the service exposes its endpoints. Forwarded calls, calls to unconfigured endpoints and calls that already were executed on the right machine will be passed on the the implementation passed in during construction.
 //
 // Example usage:
-//  import "github.com/uber/tchannel-go/thrift"
+//  import "github.com/temporalio/tchannel-go/thrift"
 //
 //  var server thrift.Server
 //  server = ...

@@ -30,8 +30,8 @@ import (
 	"github.com/temporalio/ringpop-go/discovery/jsonfile"
 	"github.com/temporalio/ringpop-go/forward"
 	"github.com/temporalio/ringpop-go/swim"
-	"github.com/uber/tchannel-go"
-	"github.com/uber/tchannel-go/json"
+	"github.com/temporalio/tchannel-go"
+	"github.com/temporalio/tchannel-go/json"
 	"golang.org/x/net/context"
 )
 

@@ -32,8 +32,8 @@ import (
 	"github.com/temporalio/ringpop-go/discovery/jsonfile"
 	gen "github.com/temporalio/ringpop-go/examples/keyvalue/gen-go/keyvalue"
 	"github.com/temporalio/ringpop-go/swim"
-	"github.com/uber/tchannel-go"
-	"github.com/uber/tchannel-go/thrift"
+	"github.com/temporalio/tchannel-go"
+	"github.com/temporalio/tchannel-go/thrift"
 )
 
 var (

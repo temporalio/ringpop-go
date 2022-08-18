@@ -7,7 +7,7 @@ import (
 	"github.com/temporalio/ringpop-go/events"
 	"github.com/temporalio/ringpop-go/forward"
 	"github.com/temporalio/ringpop-go/swim"
-	"github.com/uber/tchannel-go"
+	"github.com/temporalio/tchannel-go"
 )
 
 type Ringpop struct {

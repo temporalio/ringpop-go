@@ -28,7 +28,7 @@ import (
 	"github.com/stretchr/testify/suite"
 	"github.com/temporalio/ringpop-go/events"
 	"github.com/temporalio/ringpop-go/util"
-	"github.com/uber/tchannel-go"
+	"github.com/temporalio/tchannel-go"
 )
 
 type PingRequestTestSuite struct {

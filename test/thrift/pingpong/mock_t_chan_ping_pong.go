@@ -2,7 +2,7 @@ package pingpong
 
 import (
 	"github.com/stretchr/testify/mock"
-	"github.com/uber/tchannel-go/thrift"
+	"github.com/temporalio/tchannel-go/thrift"
 )
 
 type MockTChanPingPong struct {

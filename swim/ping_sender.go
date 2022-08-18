@@ -28,7 +28,7 @@ import (
 
 	"github.com/temporalio/ringpop-go/logging"
 	"github.com/temporalio/ringpop-go/shared"
-	"github.com/uber/tchannel-go/json"
+	"github.com/temporalio/tchannel-go/json"
 )
 
 // A Ping is used as an Arg3 for the ping TChannel call / response
