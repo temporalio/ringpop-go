@@ -13,5 +13,5 @@ require (
 	github.com/stretchr/testify v1.7.0
 	github.com/temporalio/tchannel-go v1.22.1-0.20220818200552-1be8d8cffa5b
 	github.com/uber-common/bark v1.0.0
-	golang.org/x/net v0.10.0
+	golang.org/x/net v0.17.0
 )
