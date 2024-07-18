@@ -46,8 +46,6 @@ type discoverProviderHealer struct {
 	started              chan struct{}
 
 	logger log.Logger
-
-	rand *rand.Rand
 }
 
 func newDiscoverProviderHealer(n *Node, baseProbability float64, period time.Duration) *discoverProviderHealer {
@@ -58,7 +56,6 @@ func newDiscoverProviderHealer(n *Node, baseProbability float64, period time.Dur
 		logger:           logging.Logger("healer").WithField("local", n.Address()),
 		started:          make(chan struct{}, 1),
 		quit:             make(chan struct{}),
-		rand:             rand.New(rand.NewSource(n.clock.Now().UnixNano())),
 	}
 }
 
@@ -82,7 +79,7 @@ func (h *discoverProviderHealer) Start() {
 			}
 
 			// attempt heal with the pro
-			if h.rand.Float64() < h.Probability() {
+			if rand.Float64() < h.Probability() {
 				h.Heal()
 			}
 		}
