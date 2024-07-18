@@ -35,8 +35,7 @@ const (
 	defaultMax     = 60 * time.Second
 )
 
-var delayerRand = rand.New(rand.NewSource(time.Now().UnixNano()))
-var defaultRandomizer = delayerRand.Intn
+var defaultRandomizer = rand.Intn
 var defaultSleeper = time.Sleep
 var noDelay = time.Duration(0)
 

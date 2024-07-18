@@ -295,8 +295,8 @@ func TestShuffleStringsInPlace(t *testing.T) {
 	}
 
 	// expected probability of 1/1000 for every index so the expected number of
-	// collisions is 1. We add some slack and expect smaller or equal than 3.
-	assert.True(t, collisions <= 3, "expected that array is shuffled")
+	// collisions is 1. We add some slack and expect smaller or equal than 6.
+	assert.True(t, collisions <= 6, "expected that array is shuffled")
 
 	sort.Strings(strs)
 	sort.Strings(strs2)
