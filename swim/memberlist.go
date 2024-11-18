@@ -32,9 +32,9 @@ import (
 
 	"github.com/benbjohnson/clock"
 	"github.com/dgryski/go-farm"
-	"github.com/uber-common/bark"
 	"github.com/temporalio/ringpop-go/logging"
 	"github.com/temporalio/ringpop-go/util"
+	"github.com/uber-common/bark"
 )
 
 // A memberlist contains the membership for a node
@@ -486,12 +486,13 @@ func (m *memberlist) Evict(address string) {
 // makes a change to the member list
 func (m *memberlist) MakeChange(address string, incarnation int64, status string) []Change {
 
-	member, _ := m.Member(address)
-
 	// create the new change based on information know to the memberlist
 	var change Change
+	m.members.RLock()
+	member := m.members.byAddress[address]
 	change.populateSubject(member)
 	change.populateSource(m.local)
+	m.members.RUnlock()
 
 	// Override values that are specific to the change we are making
 	change.Address = address
