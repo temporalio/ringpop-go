@@ -57,7 +57,7 @@ type memberlist struct {
 	// could use members lock for that, but that introduces more deadlocks, so
 	// making a short-term fix instead by adding another lock. Like said, this
 	// is short-term, see github#113.
-	sync.RWMutex
+	updateLock sync.Mutex
 }
 
 // newMemberlist returns a new member list
@@ -532,7 +532,7 @@ func (m *memberlist) Update(changes []Change) (applied []Change) {
 
 	var memberChanges []membership.MemberChange
 
-	m.Lock()
+	m.updateLock.Lock()
 
 	// run through all changes received and figure out if they need to be accepted
 	m.members.Lock()
@@ -626,7 +626,7 @@ func (m *memberlist) Update(changes []Change) (applied []Change) {
 		})
 	}
 
-	m.Unlock()
+	m.updateLock.Unlock()
 	return applied
 }
 
