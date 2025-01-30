@@ -48,20 +48,19 @@ func newMemberlistIter(m *memberlist) *memberlistIter {
 // Next returns the next pingable member in the member list, if it
 // visits all members but none are pingable returns nil, false
 func (i *memberlistIter) Next() (*Member, bool) {
-	maxToVisit := i.m.NumMembers()
-	visited := make(map[string]bool)
-
-	for len(visited) < maxToVisit {
+	for maxToVisit := i.m.NumMembers(); maxToVisit >= 0; maxToVisit-- {
 		i.currentIndex++
 
-		if i.currentIndex >= i.m.NumMembers() {
+		member := i.m.MemberAt(i.currentIndex)
+		if member == nil {
 			i.currentIndex = 0
 			i.currentRound++
 			i.m.Shuffle()
+			member = i.m.MemberAt(i.currentIndex)
+			if member == nil {
+				return nil, false
+			}
 		}
-
-		member := i.m.MemberAt(i.currentIndex)
-		visited[member.Address] = true
 
 		if i.m.Pingable(*member) {
 			return member, true

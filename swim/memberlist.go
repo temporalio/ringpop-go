@@ -190,21 +190,22 @@ func (m *memberlist) RemoveMember(address string) bool {
 	return hasMember
 }
 
+// returns a copy of the member at an index, or nil if i >= length
 func (m *memberlist) MemberAt(i int) *Member {
 	m.members.RLock()
+	defer m.members.RUnlock()
+	if i >= len(m.members.list) {
+		return nil
+	}
 	member := new(Member)
 	*member = *m.members.list[i]
-	m.members.RUnlock()
-
 	return member
 }
 
 func (m *memberlist) NumMembers() int {
 	m.members.RLock()
-	n := len(m.members.list)
-	m.members.RUnlock()
-
-	return n
+	defer m.members.RUnlock()
+	return len(m.members.list)
 }
 
 // returns whether or not a member is pingable
