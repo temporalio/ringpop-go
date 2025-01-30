@@ -57,7 +57,7 @@ type memberlist struct {
 	// could use members lock for that, but that introduces more deadlocks, so
 	// making a short-term fix instead by adding another lock. Like said, this
 	// is short-term, see github#113.
-	sync.RWMutex
+	updateLock sync.Mutex
 }
 
 // newMemberlist returns a new member list
@@ -84,10 +84,8 @@ func newMemberlist(n *Node, initialLabels LabelMap) *memberlist {
 
 func (m *memberlist) Checksum() uint32 {
 	m.members.Lock()
-	checksum := m.members.checksum
-	m.members.Unlock()
-
-	return checksum
+	defer m.members.Unlock()
+	return m.members.checksum
 }
 
 // computes membership checksum
@@ -114,6 +112,7 @@ func (m *memberlist) ComputeChecksum() {
 }
 
 // generates string to use when computing checksum
+// call with m.members.lock
 func (m *memberlist) genChecksumString() string {
 	var strings sort.StringSlice
 	var buffer bytes.Buffer
@@ -142,7 +141,7 @@ func (m *memberlist) genChecksumString() string {
 	return buffer.String()
 }
 
-// returns the member at a specific address
+// returns a copy of the member at a specific address
 func (m *memberlist) Member(address string) (*Member, bool) {
 	var memberCopy *Member
 	m.members.RLock()
@@ -190,21 +189,22 @@ func (m *memberlist) RemoveMember(address string) bool {
 	return hasMember
 }
 
+// returns a copy of the member at an index, or nil if i >= length
 func (m *memberlist) MemberAt(i int) *Member {
 	m.members.RLock()
+	defer m.members.RUnlock()
+	if i >= len(m.members.list) {
+		return nil
+	}
 	member := new(Member)
 	*member = *m.members.list[i]
-	m.members.RUnlock()
-
 	return member
 }
 
 func (m *memberlist) NumMembers() int {
 	m.members.RLock()
-	n := len(m.members.list)
-	m.members.RUnlock()
-
-	return n
+	defer m.members.RUnlock()
+	return len(m.members.list)
 }
 
 // returns whether or not a member is pingable
@@ -217,12 +217,12 @@ func (m *memberlist) Pingable(member Member) bool {
 // returns the number of pingable members in the memberlist
 func (m *memberlist) NumPingableMembers() (n int) {
 	m.members.RLock()
+	defer m.members.RUnlock()
 	for _, member := range m.members.list {
 		if m.Pingable(*member) {
 			n++
 		}
 	}
-	m.members.RUnlock()
 
 	return n
 }
@@ -232,6 +232,8 @@ func (m *memberlist) RandomPingableMembers(n int, excluding map[string]bool) []M
 	members := make([]Member, 0, n)
 
 	m.members.RLock()
+	defer m.members.RUnlock()
+
 	indices := rand.Perm(len(m.members.list))
 	for _, index := range indices {
 		member := m.members.list[index]
@@ -242,7 +244,6 @@ func (m *memberlist) RandomPingableMembers(n int, excluding map[string]bool) []M
 			}
 		}
 	}
-	m.members.RUnlock()
 	return members
 }
 
@@ -250,14 +251,14 @@ func (m *memberlist) RandomPingableMembers(n int, excluding map[string]bool) []M
 // membership. The membership will be filtered by the predicates provided.
 func (m *memberlist) GetMembers(predicates ...MemberPredicate) (members []Member) {
 	m.members.RLock()
+	defer m.members.RUnlock()
+
 	members = make([]Member, 0, len(m.members.list))
 	for _, member := range m.members.list {
 		if MemberMatchesPredicates(*member, predicates...) {
 			members = append(members, *member)
 		}
 	}
-	m.members.RUnlock()
-
 	return
 }
 
@@ -312,8 +313,8 @@ func (m *memberlist) SetLocalLabel(key, value string) error {
 // argument indicates if the key was present on the node or not
 func (m *memberlist) GetLocalLabel(key string) (string, bool) {
 	m.members.RLock()
+	defer m.members.RUnlock()
 	value, has := m.local.Labels[key]
-	m.members.RUnlock()
 	return value, has
 }
 
@@ -531,7 +532,7 @@ func (m *memberlist) Update(changes []Change) (applied []Change) {
 
 	var memberChanges []membership.MemberChange
 
-	m.Lock()
+	m.updateLock.Lock()
 
 	// run through all changes received and figure out if they need to be accepted
 	m.members.Lock()
@@ -625,7 +626,7 @@ func (m *memberlist) Update(changes []Change) (applied []Change) {
 		})
 	}
 
-	m.Unlock()
+	m.updateLock.Unlock()
 	return applied
 }
 
@@ -659,15 +660,15 @@ func (m *memberlist) getJoinPosition() int {
 // shuffles the member list
 func (m *memberlist) Shuffle() {
 	m.members.Lock()
+	defer m.members.Unlock()
 	m.members.list = shuffle(m.members.list)
-	m.members.Unlock()
 }
 
 // String returns a JSON string
 func (m *memberlist) String() string {
 	m.members.RLock()
+	defer m.members.RUnlock()
 	str, _ := json.Marshal(m.members.list) // will never return error (presumably)
-	m.members.RUnlock()
 	return string(str)
 }
 
@@ -682,12 +683,13 @@ func (m *memberlist) CountMembers(predicates ...MemberPredicate) int {
 	count := 0
 
 	m.members.RLock()
+	defer m.members.RUnlock()
+
 	for _, member := range m.members.list {
 		if MemberMatchesPredicates(*member, predicates...) {
 			count++
 		}
 	}
-	m.members.RUnlock()
 
 	return count
 }

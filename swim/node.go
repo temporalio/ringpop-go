@@ -32,10 +32,10 @@ import (
 
 	"github.com/benbjohnson/clock"
 	"github.com/rcrowley/go-metrics"
-	log "github.com/uber-common/bark"
 	"github.com/temporalio/ringpop-go/logging"
 	"github.com/temporalio/ringpop-go/shared"
 	"github.com/temporalio/ringpop-go/util"
+	log "github.com/uber-common/bark"
 )
 
 var (
@@ -301,9 +301,8 @@ func (n *Node) HasChanges() bool {
 func (n *Node) Incarnation() int64 {
 	if n.memberlist != nil && n.memberlist.local != nil {
 		n.memberlist.members.RLock()
-		incarnation := n.memberlist.local.Incarnation
-		n.memberlist.members.RUnlock()
-		return incarnation
+		defer n.memberlist.members.RUnlock()
+		return n.memberlist.local.Incarnation
 	}
 	return -1
 }
