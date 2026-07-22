@@ -139,19 +139,27 @@ func (s *stateTransitions) schedule(subject subject, state string, timeout time.
 		timer.Stop()
 	}
 
-	timer := s.node.clock.AfterFunc(timeout, func() {
+	tt := &transitionTimer{state: state}
+	tt.Timer = s.node.clock.AfterFunc(timeout, func() {
 		s.logger.WithFields(bark.Fields{
 			"member": subject.address(),
 			"state":  state,
 		}).Info("executing scheduled transition for member")
 		// execute the transition
 		transition()
+
+		// Drop our own timer entry once it has fired, unless a later transition
+		// already replaced it. Terminal transitions (eviction) would otherwise
+		// leave the entry behind forever, letting member churn grow the map
+		// without bound.
+		s.Lock()
+		if s.timers[subject.address()] == tt {
+			delete(s.timers, subject.address())
+		}
+		s.Unlock()
 	})
 
-	s.timers[subject.address()] = &transitionTimer{
-		Timer: timer,
-		state: state,
-	}
+	s.timers[subject.address()] = tt
 
 	s.logger.WithFields(bark.Fields{
 		"member": subject.address(),

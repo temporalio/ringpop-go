@@ -43,6 +43,10 @@ var (
 	ErrNodeNotReady = errors.New("node is not ready to handle requests")
 )
 
+// DefaultMaxMembers is the default member cap: well above any realistic cluster
+// size while still bounding memory against fabricated-address flooding.
+const DefaultMaxMembers = 100000
+
 // Options is a configuration struct passed the NewNode constructor.
 type Options struct {
 	StateTimeouts     StateTimeouts
@@ -70,6 +74,13 @@ type Options struct {
 
 	LabelLimits   LabelOptions
 	InitialLabels LabelMap
+
+	// MaxMembers caps the number of tracked members; new addresses past the cap
+	// are ignored. Bounds memory against fabricated-address floods, but is not a
+	// defense against below-cap poisoning (that needs channel auth). Counts the
+	// local member and not-yet-reaped members, so keep it well above cluster
+	// size. 0 selects the default.
+	MaxMembers int
 
 	Clock clock.Clock
 
@@ -103,6 +114,8 @@ func defaultOptions() *Options {
 
 		LabelLimits: DefaultLabelOptions,
 
+		MaxMembers: DefaultMaxMembers,
+
 		Clock: clock.New(),
 
 		MaxReverseFullSyncJobs: 5,
@@ -124,6 +137,10 @@ func mergeDefaultOptions(opts *Options) *Options {
 
 	opts.StateTimeouts = mergeStateTimeouts(opts.StateTimeouts, def.StateTimeouts)
 	opts.LabelLimits = mergeLabelOptions(opts.LabelLimits, def.LabelLimits)
+	// 0 or negative selects the default (0 would be no cap, negative is invalid).
+	if opts.MaxMembers <= 0 {
+		opts.MaxMembers = def.MaxMembers
+	}
 
 	opts.MinProtocolPeriod = util.SelectDuration(opts.MinProtocolPeriod, def.MinProtocolPeriod)
 
@@ -217,6 +234,7 @@ type Node struct {
 	logger log.Logger
 
 	labelLimits LabelOptions
+	maxMembers  int
 
 	// clock is used to generate incarnation numbers; it is typically the
 	// system clock, wrapped via clock.New()
@@ -255,6 +273,7 @@ func NewNode(app, address string, channel shared.SubChannel, opts *Options) *Nod
 	node.requiresAppInPing = opts.RequiresAppInPing
 
 	node.labelLimits = opts.LabelLimits
+	node.maxMembers = opts.MaxMembers
 
 	node.memberlist = newMemberlist(node, opts.InitialLabels)
 	node.memberiter = newMemberlistIter(node.memberlist)

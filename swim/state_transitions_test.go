@@ -148,6 +148,9 @@ func (s *StateTransitionsSuite) TestTombstoneBecomesEvicted() {
 	s.clock.Add(1 * time.Minute)
 	_, found := s.m.Member(s.suspect.Address)
 	s.False(found, "expected member to be removed from memberlist")
+
+	s.Nil(s.stateTransitions.timer(member.Address), "expected the fired timer to be removed so churn cannot grow the map")
+	s.Empty(s.stateTransitions.timers, "expected no lingering timer entries after eviction")
 }
 
 // TestTimerCreated tests that starting suspicion for a node creates a

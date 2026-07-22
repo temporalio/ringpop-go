@@ -21,7 +21,9 @@
 package swim
 
 import (
+	"fmt"
 	"sort"
+	"strings"
 	"testing"
 
 	"github.com/temporalio/ringpop-go/events"
@@ -68,6 +70,238 @@ func (s *MemberlistTestSuite) SetupTest() {
 			Incarnation: s.incarnation,
 		},
 	}
+}
+
+func (s *MemberlistTestSuite) TestUpdateDropsInboundLabelsExceedingLimits() {
+	// Too many public labels (exceeds DefaultLabelOptions.Count): the member is
+	// still tracked, but the invalid labels are dropped (not stored/re-gossiped).
+	addr := "127.0.0.1:3002"
+	tooMany := make(map[string]string)
+	for i := 0; i < DefaultLabelOptions.Count+5; i++ {
+		tooMany[fmt.Sprintf("k%d", i)] = "v"
+	}
+	s.m.Update([]Change{{
+		Address:     addr,
+		Status:      Alive,
+		Incarnation: s.incarnation,
+		Labels:      tooMany,
+	}})
+	member, ok := s.m.Member(addr)
+	s.Require().True(ok, "the member is still tracked; only its invalid labels are dropped")
+	s.Empty(member.Labels, "labels exceeding the count limit must be dropped")
+
+	// Oversized value (exceeds DefaultLabelOptions.ValueSize) is dropped.
+	addr2 := "127.0.0.1:3003"
+	s.m.Update([]Change{{
+		Address:     addr2,
+		Status:      Alive,
+		Incarnation: s.incarnation,
+		Labels:      map[string]string{"k": strings.Repeat("x", DefaultLabelOptions.ValueSize+1)},
+	}})
+	member2, ok := s.m.Member(addr2)
+	s.Require().True(ok)
+	s.Empty(member2.Labels, "a label with an oversized value must be dropped")
+
+	// Valid labels within limits are accepted.
+	addr3 := "127.0.0.1:3006"
+	s.m.Update([]Change{{
+		Address:     addr3,
+		Status:      Alive,
+		Incarnation: s.incarnation,
+		Labels:      map[string]string{"role": "history"},
+	}})
+	member3, ok := s.m.Member(addr3)
+	s.Require().True(ok)
+	s.Equal("history", member3.Labels["role"], "valid inbound labels must be accepted")
+
+	// Exactly-at-limit labels are accepted (pins the strict > comparison).
+	addr4 := "127.0.0.1:3010"
+	atLimit := make(map[string]string)
+	for i := 0; i < DefaultLabelOptions.Count; i++ {
+		atLimit[fmt.Sprintf("k%d", i)] = strings.Repeat("v", DefaultLabelOptions.ValueSize)
+	}
+	s.m.Update([]Change{{
+		Address:     addr4,
+		Status:      Alive,
+		Incarnation: s.incarnation,
+		Labels:      atLimit,
+	}})
+	member4, ok := s.m.Member(addr4)
+	s.Require().True(ok)
+	s.Len(member4.Labels, DefaultLabelOptions.Count, "labels exactly at the limit must be accepted")
+}
+
+func (s *MemberlistTestSuite) TestUpdateBoundsInboundInternalLabels() {
+	// Too many internal labels: dropped. The internal namespace must not be a
+	// bypass for the label limits on the untrusted inbound path.
+	addr := "127.0.0.1:3007"
+	many := make(map[string]string)
+	for i := 0; i < DefaultLabelOptions.Count+5; i++ {
+		many[fmt.Sprintf("__x%d", i)] = "v"
+	}
+	s.m.Update([]Change{{
+		Address:     addr,
+		Status:      Alive,
+		Incarnation: s.incarnation,
+		Labels:      many,
+	}})
+	member, ok := s.m.Member(addr)
+	s.Require().True(ok)
+	s.Empty(member.Labels, "too many internal labels must be dropped")
+
+	// An oversized internal label value is dropped.
+	addr2 := "127.0.0.1:3008"
+	s.m.Update([]Change{{
+		Address:     addr2,
+		Status:      Alive,
+		Incarnation: s.incarnation,
+		Labels:      map[string]string{"__identity": strings.Repeat("x", DefaultLabelOptions.ValueSize+1)},
+	}})
+	member2, ok := s.m.Member(addr2)
+	s.Require().True(ok)
+	s.Empty(member2.Labels, "an oversized internal label must be dropped")
+
+	// A reasonable internal label (e.g. __identity) is accepted.
+	addr3 := "127.0.0.1:3009"
+	s.m.Update([]Change{{
+		Address:     addr3,
+		Status:      Alive,
+		Incarnation: s.incarnation,
+		Labels:      map[string]string{"__identity": "host-a"},
+	}})
+	member3, ok := s.m.Member(addr3)
+	s.Require().True(ok)
+	s.Equal("host-a", member3.Labels["__identity"], "a valid internal label must be accepted")
+
+	// Exactly-at-limit internal labels are accepted (pins the strict > boundary).
+	addr4 := "127.0.0.1:3013"
+	atLimit := make(map[string]string)
+	for i := 0; i < DefaultLabelOptions.Count; i++ {
+		atLimit[fmt.Sprintf("__x%d", i)] = "v"
+	}
+	s.m.Update([]Change{{
+		Address:     addr4,
+		Status:      Alive,
+		Incarnation: s.incarnation,
+		Labels:      atLimit,
+	}})
+	member4, ok := s.m.Member(addr4)
+	s.Require().True(ok)
+	s.Len(member4.Labels, DefaultLabelOptions.Count, "internal labels exactly at the limit must be accepted")
+}
+
+// A member with receiver-invalid labels must still be trackable and reapable:
+// the status/incarnation transition applies even when the change's labels are
+// dropped (otherwise a member could never transition to Faulty/Leave/Tombstone).
+func (s *MemberlistTestSuite) TestUpdateInvalidLabelsStillAppliesStatusTransition() {
+	addr := "127.0.0.1:3012"
+	s.m.Update([]Change{{
+		Address:     addr,
+		Status:      Alive,
+		Incarnation: s.incarnation,
+		Labels:      map[string]string{"role": "history"},
+	}})
+
+	s.m.Update([]Change{{
+		Address:     addr,
+		Status:      Faulty,
+		Incarnation: s.incarnation + 1,
+		Labels:      map[string]string{"k": strings.Repeat("x", DefaultLabelOptions.ValueSize+1)},
+	}})
+	member, ok := s.m.Member(addr)
+	s.Require().True(ok)
+	s.Equal(Faulty, member.Status, "status transition must apply even when the change's labels are invalid")
+	s.Equal("history", member.Labels["role"], "existing labels must be preserved when the incoming labels are invalid")
+}
+
+// A peer must not be able to erase an existing member's real labels by
+// gossiping a higher-incarnation change carrying invalid labels.
+func (s *MemberlistTestSuite) TestUpdateInvalidLabelsDoNotEraseExistingLabels() {
+	addr := "127.0.0.1:3011"
+	s.m.Update([]Change{{
+		Address:     addr,
+		Status:      Alive,
+		Incarnation: s.incarnation,
+		Labels:      map[string]string{"role": "history", "__identity": "host-a"},
+	}})
+	member, ok := s.m.Member(addr)
+	s.Require().True(ok)
+	s.Equal("history", member.Labels["role"])
+
+	// Higher-incarnation change with an oversized label: the labels must be
+	// dropped and the member's existing labels preserved (no label-deletion
+	// primitive), while the status/incarnation still applies.
+	s.m.Update([]Change{{
+		Address:     addr,
+		Status:      Alive,
+		Incarnation: s.incarnation + 1,
+		Labels:      map[string]string{"k": strings.Repeat("x", DefaultLabelOptions.ValueSize+1)},
+	}})
+	member, ok = s.m.Member(addr)
+	s.Require().True(ok)
+	s.Equal("history", member.Labels["role"], "existing labels must survive a rejected invalid-label change")
+	s.Equal("host-a", member.Labels["__identity"], "existing identity must survive a rejected invalid-label change")
+}
+
+func (s *MemberlistTestSuite) TestMaxMembersDefaultsAndRejectsNonPositive() {
+	unset := NewNode("t", "127.0.0.1:9101", nil, nil)
+	defer unset.Destroy()
+	s.Equal(DefaultMaxMembers, unset.maxMembers, "unset MaxMembers selects the default")
+
+	zero := NewNode("t", "127.0.0.1:9102", nil, &Options{MaxMembers: 0})
+	defer zero.Destroy()
+	s.Equal(DefaultMaxMembers, zero.maxMembers, "MaxMembers:0 selects the default")
+
+	negative := NewNode("t", "127.0.0.1:9103", nil, &Options{MaxMembers: -1})
+	defer negative.Destroy()
+	s.Equal(DefaultMaxMembers, negative.maxMembers, "a negative MaxMembers must not disable the cap")
+
+	explicit := NewNode("t", "127.0.0.1:9104", nil, &Options{MaxMembers: 42})
+	defer explicit.Destroy()
+	s.Equal(42, explicit.maxMembers, "an explicit positive MaxMembers is honored")
+}
+
+func (s *MemberlistTestSuite) TestUpdateEnforcesMaxMembers() {
+	node := NewNode("test", "127.0.0.1:9001", nil, &Options{MaxMembers: 3})
+	defer node.Destroy() // the Suspect transition below schedules a state timer
+	m := node.memberlist
+	m.MakeAlive(node.Address(), util.TimeNowMS())
+
+	countMembers := func() int {
+		m.members.RLock()
+		defer m.members.RUnlock()
+		return len(m.members.byAddress)
+	}
+
+	inc := util.TimeNowMS()
+	var changes []Change
+	for i := 0; i < 20; i++ {
+		changes = append(changes, Change{
+			Address:     fmt.Sprintf("127.0.0.2:%d", 3000+i),
+			Status:      Alive,
+			Incarnation: inc,
+		})
+	}
+	m.Update(changes)
+
+	// The cap admits members up to the limit (local + 2 remote), not fewer.
+	s.Equal(3, countMembers(), "cap must admit members up to the limit")
+
+	// Updates to an already-tracked member still apply once the cap is reached.
+	tracked := "127.0.0.2:3000"
+	_, has := m.Member(tracked)
+	s.Require().True(has)
+	m.Update([]Change{{Address: tracked, Status: Suspect, Incarnation: inc + 1}})
+	updated, ok := m.Member(tracked)
+	s.Require().True(ok)
+	s.Equal(Suspect, updated.Status, "updates to tracked members must apply after the cap")
+	s.Equal(3, countMembers(), "updating a tracked member must not change the count")
+
+	// A genuinely new address is refused once the cap is reached.
+	m.Update([]Change{{Address: "127.0.0.2:9999", Status: Alive, Incarnation: inc}})
+	_, hasNew := m.Member("127.0.0.2:9999")
+	s.False(hasNew, "a new address must be refused at the cap")
+	s.Equal(3, countMembers(), "count must stay at the cap")
 }
 
 func (s *MemberlistTestSuite) TestAddJoinList() {
