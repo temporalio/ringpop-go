@@ -274,8 +274,10 @@ func (s *MemberlistTestSuite) TestUpdateEnforcesMaxMembers() {
 	}
 
 	inc := util.TimeNowMS()
+	// A batch at the size limit that would push past the cap (local + maxMembers
+	// candidates): the cap admits up to the limit and refuses the rest.
 	var changes []Change
-	for i := 0; i < 20; i++ {
+	for i := 0; i < node.maxMembers; i++ {
 		changes = append(changes, Change{
 			Address:     fmt.Sprintf("127.0.0.2:%d", 3000+i),
 			Status:      Alive,
@@ -302,6 +304,46 @@ func (s *MemberlistTestSuite) TestUpdateEnforcesMaxMembers() {
 	_, hasNew := m.Member("127.0.0.2:9999")
 	s.False(hasNew, "a new address must be refused at the cap")
 	s.Equal(3, countMembers(), "count must stay at the cap")
+}
+
+func (s *MemberlistTestSuite) TestUpdateRejectsOversizedChangeBatch() {
+	node := NewNode("test", "127.0.0.1:9021", nil, &Options{MaxMembers: 3})
+	defer node.Destroy()
+	m := node.memberlist
+	m.MakeAlive(node.Address(), util.TimeNowMS())
+
+	countMembers := func() int {
+		m.members.RLock()
+		defer m.members.RUnlock()
+		return len(m.members.byAddress)
+	}
+	before := countMembers()
+
+	inc := util.TimeNowMS()
+	oversized := make([]Change, 0, node.maxMembers+1)
+	for i := 0; i <= node.maxMembers; i++ {
+		oversized = append(oversized, Change{
+			Address:     fmt.Sprintf("127.0.0.3:%d", 4000+i),
+			Status:      Alive,
+			Incarnation: inc,
+		})
+	}
+	applied := m.Update(oversized)
+	s.Nil(applied, "a change set larger than MaxMembers must be rejected wholesale")
+	s.Equal(before, countMembers(), "an oversized change set must not add any members")
+
+	// A batch at exactly the limit is still processed (bounded, not rejected);
+	// it fills the memberlist up to the cap.
+	atLimit := make([]Change, 0, node.maxMembers)
+	for i := 0; i < node.maxMembers; i++ {
+		atLimit = append(atLimit, Change{
+			Address:     fmt.Sprintf("127.0.0.4:%d", 4000+i),
+			Status:      Alive,
+			Incarnation: inc,
+		})
+	}
+	m.Update(atLimit)
+	s.Equal(node.maxMembers, countMembers(), "a batch at the limit is processed up to the cap")
 }
 
 func (s *MemberlistTestSuite) TestAddJoinList() {

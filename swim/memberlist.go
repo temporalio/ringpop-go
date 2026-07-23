@@ -523,6 +523,17 @@ func (m *memberlist) Update(changes []Change) (applied []Change) {
 		return nil
 	}
 
+	// Reject a change set larger than the member cap before any per-change work,
+	// event emission, or locking: it can never be fully applied and would
+	// otherwise force O(n) work while the membership lock is held.
+	if m.node.maxMembers > 0 && len(changes) > m.node.maxMembers {
+		m.logger.WithFields(bark.Fields{
+			"count": len(changes),
+			"max":   m.node.maxMembers,
+		}).Warn("ringpop ignored an incoming change set larger than MaxMembers")
+		return nil
+	}
+
 	// validate incoming changes
 	for i, change := range changes {
 		changes[i] = change.validateIncoming()
