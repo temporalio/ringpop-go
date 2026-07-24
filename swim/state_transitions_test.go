@@ -148,6 +148,28 @@ func (s *StateTransitionsSuite) TestTombstoneBecomesEvicted() {
 	s.clock.Add(1 * time.Minute)
 	_, found := s.m.Member(s.suspect.Address)
 	s.False(found, "expected member to be removed from memberlist")
+
+	s.Nil(s.stateTransitions.timer(member.Address), "expected the fired timer to be removed so churn cannot grow the map")
+	s.Empty(s.stateTransitions.timers, "expected no lingering timer entries after eviction")
+}
+
+// A non-terminal transition reschedules the next transition when it fires; the
+// fired timer's self-cleanup must not remove that replacement.
+func (s *StateTransitionsSuite) TestFiredTimerKeepsReplacement() {
+	s.m.MakeSuspect(s.suspect.Address, s.suspect.Incarnation)
+	member, _ := s.m.Member(s.suspect.Address)
+	s.Require().NotNil(member, "expected member, cannot be nil")
+
+	s.stateTransitions.ScheduleSuspectToFaulty(*member)
+	s.clock.Add(5 * time.Second) // fires suspect->faulty, which reschedules faulty->tombstone
+
+	member, _ = s.m.Member(s.suspect.Address)
+	s.Require().NotNil(member, "expected member, cannot be nil")
+	s.Equal(Faulty, member.Status, "expected member to be faulty")
+
+	s.Require().NotNil(s.stateTransitions.timer(member.Address), "the rescheduled timer must survive the fired timer's self-cleanup")
+	tt := s.stateTransitions.timers[member.Address]
+	s.Equal(Faulty, tt.state, "the surviving timer must be the faulty->tombstone replacement, not the fired suspect timer")
 }
 
 // TestTimerCreated tests that starting suspicion for a node creates a

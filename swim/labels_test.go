@@ -1,6 +1,7 @@
 package swim
 
 import (
+	"fmt"
 	"strings"
 	"testing"
 
@@ -379,4 +380,44 @@ func TestNodeLabelsInternal(t *testing.T) {
 	assert.Error(t, err, "expected error while removing an internal key via the public interface")
 	assert.False(t, removed, "expected that not all labels have been removed")
 
+}
+
+func TestValidateIncomingLabels(t *testing.T) {
+	lo := DefaultLabelOptions
+
+	require.NoError(t, lo.validateIncomingLabels(nil), "nil map is valid")
+	require.NoError(t, lo.validateIncomingLabels(map[string]string{"role": "history"}))
+
+	// Public count boundary: exactly Count is allowed, one more is not.
+	atCount := map[string]string{}
+	for i := 0; i < lo.Count; i++ {
+		atCount[fmt.Sprintf("k%d", i)] = "v"
+	}
+	require.NoError(t, lo.validateIncomingLabels(atCount))
+	atCount[fmt.Sprintf("k%d", lo.Count)] = "v"
+	require.ErrorIs(t, lo.validateIncomingLabels(atCount), ErrLabelSizeExceeded)
+
+	// Size boundary applies to keys and values.
+	require.NoError(t, lo.validateIncomingLabels(map[string]string{"k": strings.Repeat("v", lo.ValueSize)}))
+	require.ErrorIs(t, lo.validateIncomingLabels(map[string]string{"k": strings.Repeat("v", lo.ValueSize+1)}), ErrLabelSizeExceeded)
+	require.ErrorIs(t, lo.validateIncomingLabels(map[string]string{strings.Repeat("k", lo.KeySize+1): "v"}), ErrLabelSizeExceeded)
+
+	// Internal labels are bounded too (no bypass), by their own Count-sized budget.
+	require.ErrorIs(t, lo.validateIncomingLabels(map[string]string{"__identity": strings.Repeat("x", lo.ValueSize+1)}), ErrLabelSizeExceeded)
+	atMax := map[string]string{}
+	for i := 0; i < lo.Count; i++ {
+		atMax[fmt.Sprintf("__x%d", i)] = "v"
+	}
+	require.NoError(t, lo.validateIncomingLabels(atMax))
+	atMax[fmt.Sprintf("__x%d", lo.Count)] = "v"
+	require.ErrorIs(t, lo.validateIncomingLabels(atMax), ErrLabelSizeExceeded)
+
+	// Public and internal share a map but are bounded by separate budgets.
+	mixed := map[string]string{"role": "history", "__identity": "host-a"}
+	require.NoError(t, lo.validateIncomingLabels(mixed))
+	overPublic := map[string]string{"__identity": "host-a"}
+	for i := 0; i <= lo.Count; i++ {
+		overPublic[fmt.Sprintf("k%d", i)] = "v"
+	}
+	require.ErrorIs(t, lo.validateIncomingLabels(overPublic), ErrLabelSizeExceeded)
 }

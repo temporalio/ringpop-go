@@ -139,6 +139,31 @@ func (lo LabelOptions) validateLabels(current map[string]string, additional map[
 	return nil
 }
 
+// validateIncomingLabels checks a whole label map received from a peer: every
+// key/value within KeySize/ValueSize, at most Count public labels, and at most
+// Count internal (__) labels. Internal labels are bounded here (unlike
+// validateLabels, which exempts them) so a peer can't bypass the limits via the
+// __ namespace. It returns on the first violation rather than scanning the
+// whole map.
+func (lo LabelOptions) validateIncomingLabels(labels map[string]string) error {
+	public := 0
+	internal := 0
+	for key, value := range labels {
+		if len(key) > lo.KeySize || len(value) > lo.ValueSize {
+			return ErrLabelSizeExceeded
+		}
+		if isInternalLabel(key) {
+			internal++
+		} else {
+			public++
+		}
+		if public > lo.Count || internal > lo.Count {
+			return ErrLabelSizeExceeded
+		}
+	}
+	return nil
+}
+
 func isInternalLabel(key string) bool {
 	return strings.HasPrefix(key, labelsInternalNamespacePrefix)
 }

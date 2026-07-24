@@ -523,6 +523,17 @@ func (m *memberlist) Update(changes []Change) (applied []Change) {
 		return nil
 	}
 
+	// Reject a change set larger than the member cap before any per-change work,
+	// event emission, or locking: it can never be fully applied and would
+	// otherwise force O(n) work while the membership lock is held.
+	if m.node.maxMembers > 0 && len(changes) > m.node.maxMembers {
+		m.logger.WithFields(bark.Fields{
+			"count": len(changes),
+			"max":   m.node.maxMembers,
+		}).Warn("ringpop ignored an incoming change set larger than MaxMembers")
+		return nil
+	}
+
 	// validate incoming changes
 	for i, change := range changes {
 		changes[i] = change.validateIncoming()
@@ -531,6 +542,8 @@ func (m *memberlist) Update(changes []Change) (applied []Change) {
 	m.node.EmitEvent(MemberlistChangesReceivedEvent{changes})
 
 	var memberChanges []membership.MemberChange
+	rejectedInvalidLabels := 0
+	rejectedAtCap := 0
 
 	m.updateLock.Lock()
 
@@ -538,6 +551,20 @@ func (m *memberlist) Update(changes []Change) (applied []Change) {
 	m.members.Lock()
 	for _, change := range changes {
 		member, has := m.members.byAddress[change.Address]
+
+		// Sanitize labels instead of dropping the whole change (which also carries
+		// the status/incarnation transition): on invalid labels, keep a known
+		// member's existing labels or drop a new member's, and let the rest of the
+		// change be processed normally. Invalid labels are never stored or
+		// re-gossiped.
+		if len(change.Labels) > 0 && m.node.labelLimits.validateIncomingLabels(change.Labels) != nil {
+			if has {
+				change.Labels = member.Labels
+			} else {
+				change.Labels = nil
+			}
+			rejectedInvalidLabels++
+		}
 
 		// transform the change into a member that we can test against existing
 		// members
@@ -556,6 +583,13 @@ func (m *memberlist) Update(changes []Change) (applied []Change) {
 				m.node.EmitEvent(RefuteUpdateEvent{})
 			} else {
 				// otherwise it can be applied to the memberlist
+
+				// refuse new members past the cap to bound memory; count and log
+				// once after the loop to avoid per-change log/lock amplification.
+				if !has && m.node.maxMembers > 0 && len(m.members.byAddress) >= m.node.maxMembers {
+					rejectedAtCap++
+					continue
+				}
 
 				// prepare the change and collect if there is an outside
 				// observable change eg. changes that involve active
@@ -594,6 +628,18 @@ func (m *memberlist) Update(changes []Change) (applied []Change) {
 		}
 	}
 	m.members.Unlock()
+
+	if rejectedInvalidLabels > 0 {
+		m.logger.WithField("count", rejectedInvalidLabels).
+			Warn("ringpop dropped invalid labels on incoming changes")
+	}
+
+	if rejectedAtCap > 0 {
+		m.logger.WithFields(bark.Fields{
+			"count": rejectedAtCap,
+			"max":   m.node.maxMembers,
+		}).Warn("ringpop ignored new members; MaxMembers cap reached")
+	}
 
 	if len(applied) > 0 {
 		// when there are changes applied we need to recalculate our checksum
