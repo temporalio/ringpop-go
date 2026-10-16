@@ -24,6 +24,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/benbjohnson/clock"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
 	"github.com/temporalio/ringpop-go/events"
@@ -117,6 +118,35 @@ func (s *PingRequestTestSuite) TestTimesOut() {
 		s.Fail("expected ping request to fail")
 	}
 
+}
+
+// A helper node that belongs to a different ringpop app must reject the ping
+// request and must not learn about the members of the sender's cluster.
+func (s *PingRequestTestSuite) TestHelperFromDifferentApp() {
+	bootstrapNodes(s.T(), s.tnode)
+
+	ch, err := tchannel.NewChannel("test", nil)
+	s.Require().NoError(err, "expected to setup tchannel")
+	s.Require().NoError(ch.ListenAndServe("127.0.0.1:0"), "expected to listen on channel")
+	helperNode := NewNode("other", ch.PeerInfo().HostPort, ch.GetSubChannel("test"), &Options{
+		Clock: clock.NewMock(),
+	})
+	helper := &testNode{helperNode, ch, nil}
+	defer destroyNodes(helper)
+	bootstrapNodes(s.T(), helper)
+
+	s.node.memberlist.MakeAlive(helper.node.Address(), s.incarnation)
+
+	response := <-sendPingRequests(s.node, "127.0.0.1:3003", 1, time.Second)
+	switch res := response.(type) {
+	case error:
+		s.Error(res, "expected ping request to a different app to fail")
+	default:
+		s.Fail("expected ping request to a different app to fail")
+	}
+
+	_, ok := helper.node.memberlist.Member(s.node.Address())
+	s.False(ok, "helper must not learn members of a different app")
 }
 
 func TestPingRequestTestSuite(t *testing.T) {

@@ -42,6 +42,10 @@ func handlePingRequest(node *Node, req *pingRequest) (*pingResponse, error) {
 		Changes: req.Changes,
 	})
 
+	if err := validatePingApp(node, req.App, req.Source); err != nil {
+		return nil, err
+	}
+
 	node.serverRate.Mark(1)
 	node.totalRate.Mark(1)
 
