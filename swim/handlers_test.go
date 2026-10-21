@@ -227,6 +227,81 @@ func (s *HandlerTestSuite) TestPingRequestHandler() {
 	s.True(res.Ok, "expected ok response from ping")
 }
 
+func (s *HandlerTestSuite) TestPingRequestHandlerSameApp() {
+	// Bootstrap the test node, so it's ready to receive pings
+	node := s.testNode.node
+	node.Bootstrap(&BootstrapOptions{
+		DiscoverProvider: statichosts.New(node.Address()),
+	})
+
+	req := &pingRequest{
+		Source:            node.Address(),
+		SourceIncarnation: node.Incarnation(),
+		Checksum:          node.memberlist.Checksum(),
+		Changes:           nil,
+		Target:            node.Address(),
+		App:               node.app,
+	}
+
+	res, err := node.pingRequestHandler(s.ctx, req)
+
+	s.NoError(err, "No error on ping request with same app name")
+	s.True(res.Ok, "expected ok response from ping")
+}
+
+func (s *HandlerTestSuite) TestPingRequestHandlerRejectsEmptyApp() {
+	// Bootstrap the test node, so it's ready to receive pings
+	node := s.testNode.node
+	node.Bootstrap(&BootstrapOptions{
+		DiscoverProvider: statichosts.New(node.Address()),
+	})
+	node.requiresAppInPing = true
+
+	req := &pingRequest{
+		Source:            node.Address(),
+		SourceIncarnation: node.Incarnation(),
+		Checksum:          node.memberlist.Checksum(),
+		Changes:           nil,
+		Target:            node.Address(),
+	}
+
+	res, err := node.pingRequestHandler(s.ctx, req)
+
+	s.Error(err, "expected error when node requires app")
+	s.Nil(res)
+}
+
+func (s *HandlerTestSuite) TestPingRequestHandlerDifferentApp() {
+	// Bootstrap the test node, so it's ready to receive pings
+	node := s.testNode.node
+	node.Bootstrap(&BootstrapOptions{
+		DiscoverProvider: statichosts.New(node.Address()),
+	})
+
+	foreignMember := "192.0.2.100:1234"
+	req := &pingRequest{
+		Source:            "192.0.2.1:1234",
+		SourceIncarnation: 1,
+		Checksum:          node.memberlist.Checksum(),
+		Changes: []Change{{
+			Source:            "192.0.2.1:1234",
+			SourceIncarnation: 1,
+			Address:           foreignMember,
+			Incarnation:       1,
+			Status:            Alive,
+		}},
+		Target: node.Address(),
+		App:    node.app + node.app,
+	}
+
+	res, err := node.pingRequestHandler(s.ctx, req)
+
+	s.Error(err, "expected error when app doesn't match")
+	s.Nil(res)
+	_, ok := node.memberlist.Member(foreignMember)
+	s.False(ok, "changes from a different app must not be applied")
+}
+
 func (s *HandlerTestSuite) TestPingHandler() {
 	// Bootstrap the test node, so it's ready to receive pings
 	node := s.testNode.node

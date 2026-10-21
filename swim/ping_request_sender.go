@@ -38,6 +38,7 @@ type pingRequest struct {
 	Target            string   `json:"target"`
 	Checksum          uint32   `json:"checksum"`
 	Changes           []Change `json:"changes"`
+	App               string   `json:"app"`
 }
 
 // A PingRequestSender is used to make a ping request to a remote node
@@ -98,6 +99,7 @@ func (p *pingRequestSender) MakeCall(ctx json.Context, res *pingResponse) <-chan
 			Checksum:          p.node.memberlist.Checksum(),
 			Changes:           changes,
 			Target:            p.target,
+			App:               p.node.app,
 		}
 
 		peer := p.node.channel.Peers().GetOrAdd(p.peer)

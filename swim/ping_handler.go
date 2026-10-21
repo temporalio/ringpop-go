@@ -39,21 +39,8 @@ func handlePing(node *Node, req *ping) (*ping, error) {
 		Changes: req.Changes,
 	})
 
-	if req.App == "" {
-		if node.requiresAppInPing {
-			node.logger.WithFields(log.Fields{
-				"source": req.Source,
-			}).Warn("Rejected ping from unknown ringpop app")
-			return nil, errors.New("Pinged ringpop requires app name")
-		}
-	} else {
-		if req.App != node.app {
-			node.logger.WithFields(log.Fields{
-				"app":    req.App,
-				"source": req.Source,
-			}).Warn("Rejected ping from wrong ringpop app")
-			return nil, errors.New("Pinged ringpop has a different app name")
-		}
+	if err := validatePingApp(node, req.App, req.Source); err != nil {
+		return nil, err
 	}
 
 	node.serverRate.Mark(1)
@@ -77,4 +64,29 @@ func handlePing(node *Node, req *ping) (*ping, error) {
 	}
 
 	return res, nil
+}
+
+// validatePingApp rejects pings and ping requests that originate from a
+// different ringpop app, so that membership changes from another cluster are
+// never applied to the local memberlist.
+func validatePingApp(node *Node, app, source string) error {
+	if app == "" {
+		if node.requiresAppInPing {
+			node.logger.WithFields(log.Fields{
+				"source": source,
+			}).Warn("Rejected ping from unknown ringpop app")
+			return errors.New("Pinged ringpop requires app name")
+		}
+		return nil
+	}
+
+	if app != node.app {
+		node.logger.WithFields(log.Fields{
+			"app":    app,
+			"source": source,
+		}).Warn("Rejected ping from wrong ringpop app")
+		return errors.New("Pinged ringpop has a different app name")
+	}
+
+	return nil
 }
