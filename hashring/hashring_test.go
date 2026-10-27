@@ -362,6 +362,35 @@ func TestLookupN(t *testing.T) {
 	assert.Len(t, unique, 9, "expected to get nine unique servers")
 }
 
+func TestLookupNFiltered(t *testing.T) {
+	ring := New(farm.Fingerprint32, 10)
+	members := genMembers(1, 1, 10, false)
+	ring.AddMembers(members...)
+
+	// filtering on the full ring should match a ring built from the subset
+	subset := New(farm.Fingerprint32, 10)
+	included := make(map[string]bool)
+	for i, member := range members {
+		if i%3 != 0 {
+			subset.AddMembers(member)
+			included[member.GetAddress()] = true
+		}
+	}
+	include := func(server string) bool { return included[server] }
+
+	for i := 0; i < 1000; i++ {
+		key := fmt.Sprintf("key%d", i)
+		for _, n := range []int{1, 3, 10} {
+			assert.Equal(t, subset.LookupN(key, n), ring.LookupNFiltered(key, n, include))
+		}
+	}
+
+	// no included servers
+	assert.Empty(t, ring.LookupNFiltered("key", 3, func(string) bool { return false }))
+	// all included servers
+	assert.Equal(t, ring.LookupN("key", 3), ring.LookupNFiltered("key", 3, func(string) bool { return true }))
+}
+
 func TestLookupNOrder(t *testing.T) {
 	tests := []struct {
 		n              int
