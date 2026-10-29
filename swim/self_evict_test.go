@@ -111,6 +111,36 @@ func (s *SelfEvictTestSuite) TestSelfEvict_SelfEvict() {
 	hooks.AssertNumberOfCalls(s.T(), "PostEvict", 1)
 }
 
+// Gossip keeps adjusting the propagation count while a node evicts itself on shutdown, so
+// eviction must not read it unsynchronized. Run with -race.
+func (s *SelfEvictTestSuite) TestSelfEvict_SelfEvict_WhileGossipAdjustsMaxPropagations() {
+	stop := make(chan struct{})
+	var wg sync.WaitGroup
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+		d := s.node.disseminator
+		for i := 0; ; i++ {
+			select {
+			case <-stop:
+				return
+			default:
+			}
+			// Membership barely changes in a two-node test, so vary the factor instead to make
+			// every adjustment write a new value, as a membership change would.
+			d.Lock()
+			d.pFactor = defaultPFactor + i%2
+			d.Unlock()
+			d.AdjustMaxPropagations()
+		}
+	}()
+
+	err := s.node.SelfEvict()
+	close(stop)
+	wg.Wait()
+	s.Assert().NoError(err, "expected no error during self eviction")
+}
+
 func (s *SelfEvictTestSuite) TestSelfEvict_SelfEvict_InvokedTwice_AfterCompleted() {
 	err := s.node.SelfEvict()
 	s.Assert().NoError(err, "expected no error during self eviction")
