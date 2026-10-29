@@ -189,9 +189,9 @@ func (s *selfEvict) evict() {
 
 	// final number of members to ping should not exceed any of:
 	numberOfPings := util.Min(
-		s.node.disseminator.maxP, // the piggyback counter
-		numberOfPingableMembers,  // the number of members we can ping
-		maxNumberOfPings,         // a configured percentage of members
+		s.node.disseminator.maxPropagations(), // the piggyback counter
+		numberOfPingableMembers,               // the number of members we can ping
+		maxNumberOfPings,                      // a configured percentage of members
 	)
 
 	if numberOfPings <= 0 {

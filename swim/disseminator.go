@@ -96,6 +96,14 @@ func (d *disseminator) AdjustMaxPropagations() {
 	d.Unlock()
 }
 
+// maxPropagations returns how many times a change is disseminated. Gossip adjusts it as
+// membership changes, so it has to be read under the lock.
+func (d *disseminator) maxPropagations() int {
+	d.RLock()
+	defer d.RUnlock()
+	return d.maxP
+}
+
 // HasChanges reports whether disseminator has changes to disseminate.
 func (d *disseminator) HasChanges() bool {
 	d.RLock()
