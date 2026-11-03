@@ -376,13 +376,27 @@ func (r *HashRing) Lookup(key string) (string, bool) {
 // are less servers than N, we simply return all existing servers.
 func (r *HashRing) LookupN(key string, n int) []string {
 	r.RLock()
-	servers := r.lookupNNoLock(key, n)
+	servers := r.lookupNNoLock(key, n, nil)
+	r.RUnlock()
+	return servers
+}
+
+// LookupNFiltered is like LookupN, but servers for which include returns false
+// are skipped, as if they were not in the HashRing. Since the positions of a
+// server's replica points do not depend on the other servers in the ring, the
+// result is the same as LookupN on a HashRing containing only the included
+// servers. include may be called multiple times for the same server and should
+// return the same result each time.
+func (r *HashRing) LookupNFiltered(key string, n int, include func(server string) bool) []string {
+	includeValue := func(v valuetype) bool { return include(v.(string)) }
+	r.RLock()
+	servers := r.lookupNNoLock(key, n, includeValue)
 	r.RUnlock()
 	return servers
 }
 
 // This function isn't thread-safe, only call it when the HashRing is locked.
-func (r *HashRing) lookupNNoLock(key string, n int) []string {
+func (r *HashRing) lookupNNoLock(key string, n int, include func(valuetype) bool) []string {
 	hash := r.hashfunc(key)
 	unique := make(map[valuetype]struct{})
 	orderedUnique := make([]valuetype, 0, n)
@@ -391,9 +405,9 @@ func (r *HashRing) lookupNNoLock(key string, n int) []string {
 	// collected all the servers we want, we have reached the
 	// end of the red-black tree and we need to loop around and inspect the
 	// tree starting at 0.
-	r.tree.LookupOrderedNUniqueAt(n, replicaPoint{hash: hash}, unique, &orderedUnique)
+	r.tree.LookupOrderedNUniqueAt(n, replicaPoint{hash: hash}, unique, &orderedUnique, include)
 	if len(unique) < n {
-		r.tree.LookupOrderedNUniqueAt(n, replicaPoint{hash: 0}, unique, &orderedUnique)
+		r.tree.LookupOrderedNUniqueAt(n, replicaPoint{hash: 0}, unique, &orderedUnique, include)
 	}
 
 	var servers []string

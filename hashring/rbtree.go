@@ -307,20 +307,22 @@ func (t *redBlackTree) Search(key keytype) (valuetype, bool) {
 // relies on writing the unique values to a golang map type, order cannot be
 // inferred. DEPRECATED, but maintained for backwards compatibility.
 func (t *redBlackTree) LookupNUniqueAt(n int, key keytype, result map[valuetype]struct{}) {
-	findNUniqueAbove(t.root, n, key, result, nil)
+	findNUniqueAbove(t.root, n, key, result, nil, nil)
 }
 
 // LookupOrderedNUniqueAt iterates through the tree from the last node that is
 // smaller than key or equal, and returns the next n unique values. This function
 // is not guaranteed to return n values, less might be returned. This method
 // replaces LookupNUniqueAt since it uses a slice to guarantee order.
-func (t *redBlackTree) LookupOrderedNUniqueAt(n int, key keytype, result map[valuetype]struct{}, orderedResult *[]valuetype) {
-	findNUniqueAbove(t.root, n, key, result, orderedResult)
+// If include is non-nil, values for which it returns false are skipped.
+func (t *redBlackTree) LookupOrderedNUniqueAt(n int, key keytype, result map[valuetype]struct{}, orderedResult *[]valuetype, include func(valuetype) bool) {
+	findNUniqueAbove(t.root, n, key, result, orderedResult, include)
 }
 
 // findNUniqueAbove is a recursive search that finds n unique values with a key
-// bigger or equal than key
-func findNUniqueAbove(node *redBlackNode, n int, key keytype, result map[valuetype]struct{}, orderedResult *[]valuetype) {
+// bigger or equal than key. If include is non-nil, values for which it returns
+// false are skipped.
+func findNUniqueAbove(node *redBlackNode, n int, key keytype, result map[valuetype]struct{}, orderedResult *[]valuetype, include func(valuetype) bool) {
 	if len(result) >= n || node == nil {
 		return
 	}
@@ -328,7 +330,7 @@ func findNUniqueAbove(node *redBlackNode, n int, key keytype, result map[valuety
 	// skip left branch when all its keys are smaller than key
 	cmp := node.key.Compare(key)
 	if cmp >= 0 {
-		findNUniqueAbove(node.left, n, key, result, orderedResult)
+		findNUniqueAbove(node.left, n, key, result, orderedResult, include)
 	}
 
 	// Make sure to stop when we have n unique values
@@ -336,12 +338,12 @@ func findNUniqueAbove(node *redBlackNode, n int, key keytype, result map[valuety
 		return
 	}
 
-	if cmp >= 0 {
+	if cmp >= 0 && (include == nil || include(node.value)) {
 		if _, ok := result[node.value]; !ok && orderedResult != nil {
 			*orderedResult = append(*orderedResult, node.value)
 		}
 		result[node.value] = struct{}{}
 	}
 
-	findNUniqueAbove(node.right, n, key, result, orderedResult)
+	findNUniqueAbove(node.right, n, key, result, orderedResult, include)
 }
